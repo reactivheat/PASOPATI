@@ -100,7 +100,7 @@ class Evidence:
     id: str
     source: str
     authorized_target: str
-    url: str
+    url: str | None
     collected_at: str
     method: str
     tool: str
@@ -110,6 +110,9 @@ class Evidence:
     connected_address: str | None = None
     http_status: int | None = None
     redirect_destination: str | None = None
+    subject_name: str | None = None
+    query_name: str | None = None
+    query_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,6 +126,36 @@ class Asset:
 
 
 @dataclass(frozen=True)
+class SourceStatus:
+    source: str
+    status: str
+    reason: str
+    candidates: int = 0
+    discarded: int = 0
+    input_digest: str | None = None
+
+
+@dataclass(frozen=True)
+class WildcardCheck:
+    parent: str
+    status: str
+    evidence: tuple[Evidence, ...] = ()
+    observations: tuple[Observation, ...] = ()
+
+
+@dataclass(frozen=True)
+class DiscoveryDetails:
+    domain: str
+    sources: tuple[SourceStatus, ...]
+    resolve_requested: bool
+    provider_queries_disclosed: bool
+    dns_queries_used: int = 0
+    provider_http_attempts: int = 0
+    provider_evidence: tuple[Evidence, ...] = ()
+    wildcard_checks: tuple[WildcardCheck, ...] = ()
+
+
+@dataclass(frozen=True)
 class RunReport:
     run_id: str
     tool_version: str
@@ -132,23 +165,38 @@ class RunReport:
     requests_used: int
     include_titles: bool
     assets: tuple[Asset, ...]
+    discovery: DiscoveryDetails | None = None
 
     @property
     def ok(self) -> bool:
+        if self.discovery is not None:
+            return all(s.status == "completed" for s in self.discovery.sources) and all(
+                a.status == "completed" for a in self.assets
+            )
         return bool(self.assets) and all(a.status == "completed" for a in self.assets)
 
     @property
     def status(self) -> str:
         if self.ok:
             return "completed"
-        return "partial" if any(a.evidence for a in self.assets) else "failed"
+        collected = any(a.evidence for a in self.assets) or (
+            self.discovery is not None and bool(self.discovery.provider_evidence)
+        )
+        return "partial" if collected else "failed"
 
     def to_dict(self) -> dict[str, object]:
+        data = asdict(self)
+        if self.discovery is None:
+            del data["discovery"]  # Preserve M2A's schema-1 shape.
+            for asset in data["assets"]:
+                for item in asset["evidence"]:
+                    for key in ("subject_name", "query_name", "query_type"):
+                        del item[key]
         return {
-            "schema_version": "1",
+            "schema_version": "2" if self.discovery is not None else "1",
             "report_type": "pasopati.recon",
             "tool": "PASOPATI",
-            **asdict(self),
+            **data,
             "ok": self.ok,
             "status": self.status,
             "summary": {
@@ -157,7 +205,11 @@ class RunReport:
             },
             "findings": [],
             "vulnerability_assessment": "not_performed",
-            "coverage": "explicit_urls_only_no_crawling_or_subdomain_discovery",
+            "coverage": (
+                "bounded_subdomain_candidates_no_automatic_http_probing"
+                if self.discovery is not None
+                else "explicit_urls_only_no_crawling_or_subdomain_discovery"
+            ),
             "redaction": "url_paths_and_queries_withheld_header_values_restricted",
         }
 

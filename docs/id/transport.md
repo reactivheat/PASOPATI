@@ -1,9 +1,9 @@
-# Transport berbatas scope (M1B, diperluas untuk M2A)
+# Transport berbatas scope (M1B, bersama M2A/M2B)
 
 [English](../en/transport.md) · [Konfigurasi](configuration.md)
 
 `pasopati.transport.Session(config).fetch(url, method="GET")` adalah API Python
-untuk [kolektor scan M2A](recon.md) dan modul berikutnya. Hasil immutable berisi
+untuk [kolektor scan M2A](recon.md) dan [provider CT](discovery.md) tetap M2B. Hasil immutable berisi
 status/body/content-type, trace hop respons dan flag pemotongan di memori.
 Tidak menulis body, cookie atau header ke disk. Jangan menampilkan/menyimpan body,
 URL atau nilai header sementara secara mentah. CLI kebijakan tetap offline tanpa
@@ -36,7 +36,9 @@ izin hukum. Setiap tujuan redirect diperiksa lagi.
 
 Satu Session berbagi budget 50 percobaan, laju agregat 1 request/detik, concurrency 2.
 Budget dikurangi sebelum tiap hop, termasuk kegagalan DNS/koneksi. Tanpa retry
-otomatis. Redirect 301/302/303/307/308 memakai budget/rate yang sama dan tetap
+aplikasi otomatis. Resolver DNS dapat mengirim ulang atau mencoba nameserver
+terkonfigurasi dalam lifetime berbatas; percobaan bukan penghitung paket jaringan.
+Redirect 301/302/303/307/308 memakai budget/rate yang sama dan tetap
 memakai metode awal (GET/HEAD). Mendukung Location relatif. Maksimum tiga redirect;
 loop, Location kosong, keluar scope, scheme terlarang dan downgrade HTTPS ditolak.
 Header dibangun ulang tetap; tanpa penerusan kredensial/cookie/header sensitif.
@@ -55,6 +57,13 @@ respons dan menandai `body_truncated`; cakupan inventaris parsial. HEAD tanpa bo
 Hanya encoding identity;
 kompresi ditolak, bukan didekompresi. Tanpa cookie jar, proxy environment,
 negosiasi autentikasi, penerusan kredensial, penyimpanan atau logging.
+
+M2B memisahkan kontrol bersama yang digunakan nyata ke `limits.RequestBudget` dan
+resolusi berbatas ke `dns_client.DNSResolver`; transport tetap mengekspor nama API
+lama. `Session(config, budget=shared)` mensyaratkan profil immutable cocok. Discovery
+memakai budget yang sama untuk hop provider dan tiap lookup A/AAAA target, termasuk
+wildcard berbatas. Scope provider terpisah tidak memperluas scope target.
+Validasi DNS tidak membuat koneksi HTTP kandidat. Lihat [discovery](discovery.md).
 
 ## Tes dan keterbatasan
 

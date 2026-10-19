@@ -55,6 +55,9 @@ reserved, dokumentasi, shared address space dan transisi IPv6 tetap ditolak.
 read 5s, total operasi 10s, body 64 KiB. Profil immutable tidak memberikan
 otorisasi atau memperluas scope. M2A [scan](recon.md) memerlukan otorisasi,
 profil safe dan scope yang cocok; perintah kebijakan tetap offline.
+M2B [discovery](discovery.md) default kandidat lokal offline; DNS/crt.sh memerlukan
+opt-in eksplisit, otorisasi dan domain dasar dalam allowlist. Discovery berbagi
+budget safe lintas hop provider dan lookup DNS target, bukan paket jaringan.
 
 Kode keluar: 0 berhasil/cocok; 1 penolakan scope atau kegagalan I/O/operasi;
 2 argumen/konfigurasi/profil invalid. Kesalahan aplikasi JSON memiliki reason

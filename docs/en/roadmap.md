@@ -9,28 +9,30 @@ verification environment, not a restriction that scanning works only offline.
 
 ## Present capability, not marketing
 
-| Function | PASOPATI M2A | Next work |
+| Function | PASOPATI M2B | Next work |
 | --- | --- | --- |
 | Explicit authorized URL inventory | Implemented, bounded DNS/HTTP/HTTPS | Extend metadata carefully |
 | Evidence, scope, shared limits, JSON/TXT | Implemented | Correlation and run comparison |
-| Subdomain enumeration | Not implemented | Candidate discovery and DNS validation |
+| Subdomain enumeration | Explicit file/wordlist/crt.sh candidates; opt-in scoped DNS/wildcard checks | Additional providers and separately measured coverage |
 | Host/port/service inventory | Not implemented | Explicit bounded TCP-connect inventory |
 | TLS certificate inventory | Not implemented; certificate verification is enforced | Extract verified metadata |
 | Vulnerability/CVE validation | Not performed | Evidence-based checks with separate acceptance criteria |
 | HTML reports, history/diff | Not implemented | Render the normalized model, never infer in renderers |
 
 [Nmap's reference guide](https://nmap.org/book/man.html) documents host discovery,
-port scanning, service/version and OS detection, among other functions. M2A does
+port scanning, service/version and OS detection, among other functions. M2B does
 not implement those engines. [Sublist3r](https://github.com/aboul3la/Sublist3r) is a
-subdomain enumeration tool; M2A does not enumerate subdomains. These projects are
+subdomain enumeration tool; M2B now has its own bounded discovery workflow, not a
+claim of equal coverage or speed. These projects are
 references, not bundled dependencies, validated integrations or defeated benchmarks.
 
-## Proposed milestones, not active features
+## Completed scope and proposed next milestones
 
-1. **M2B — domain/subdomain discovery.** Explicit provider selection and disclosure
-   of queries sent to third parties, bounded provider budgets, provenance and
-   deduplication. Validate DNS and label boundaries; discovered names are candidates,
-   not automatically authorized targets. No active probing outside approved scope.
+1. **M2B — implemented domain/subdomain discovery.** See [the functional guide](discovery.md).
+   Explicit file/wordlist/crt.sh sources, provider disclosure, shared logical budgets,
+   provenance/digests, label-boundary checks and opt-in A/AAAA/wildcard observations.
+   Discovered names remain candidates, not automatically authorized targets; no
+   automatic HTTP probing. Fixtures verify behavior, not public-provider availability.
 2. **M2C — port/service inventory.** Start with unprivileged TCP-connect checks to
    explicitly allowed addresses/ports. Share scope, numeric pinning, deadlines,
    rate/concurrency/attempt budgets and cleanup controls. Do not mislabel timeouts

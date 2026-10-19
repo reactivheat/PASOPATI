@@ -44,3 +44,7 @@ jalankan `python -m pasopati.lab` di terminal lain, lalu pakai contoh loopback-o
 dari checkout. Laporan JSON/TXT adalah inventaris, bukan vonis kerentanan.
 Path non-root/query disamarkan; judul memerlukan opt-in. Lihat
 [konfigurasi](configuration.md) dan [transport](transport.md).
+
+Kemampuan berikutnya, [discovery subdomain](discovery.md), dimulai offline dengan
+contoh file/wordlist sintetis. Pilih sumber eksplisit; DNS dan query pihak ketiga
+merupakan opt-in terpisah, bukan HTTP otomatis ke nama hasil discovery.

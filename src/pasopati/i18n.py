@@ -16,9 +16,45 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_doctor": "Check local environment readiness",
         "quick_json": "Get machine-readable environment checks",
         "foundation": (
-            "M2A: authorized URL inventory; offline policy and diagnostics remain available."
+            "M2B: explicit-source discovery and authorized URL inventory; offline policy remains."
         ),
         "recon_title": "DNS/HTTP inventory",
+        "discovery_title": "Subdomain candidates and DNS observations",
+        "discovery_domain": "Domain context",
+        "discovery_attempts": "Logical attempt units used (not DNS packets)",
+        "discovery_counts": "DNS RR lookups: {dns}; provider HTTP attempts: {http}",
+        "discovery_limitations": (
+            "Candidates are not authorization or proof of live hosts. No target HTTP probing."
+        ),
+        "provider_disclosure": "The selected domain query was explicitly permitted for crt.sh.",
+        "invalid_domain": "Provide a valid domain, not a URL, IP, credential or wildcard.",
+        "invalid_discovery": "Select explicit sources and provide the matching input options.",
+        "invalid_candidates": (
+            "Invalid or oversized candidate input; names must remain within the domain."
+        ),
+        "candidates_io": "Cannot read bounded UTF-8 candidate input.",
+        "provider_consent_required": (
+            "crt.sh requires --allow-provider-queries; the domain is sent to a third party."
+        ),
+        "provider_invalid": (
+            "The provider returned unsupported or malformed JSON; no candidates invented."
+        ),
+        "provider_unavailable": "The provider did not return HTTP 200; no automatic retry.",
+        "provider_invalid_rows": "Some provider records were malformed; collection is partial.",
+        "candidate_limit": "Candidate/input limit reached; collection is partial.",
+        "source_complete": "Selected source processed within its declared limits.",
+        "candidate_collected": "Unverified candidate collected; DNS/connectivity were not checked.",
+        "wildcard_pattern": "Wildcard pattern retained; this is not a concrete hostname.",
+        "dns_resolved": "Address records observed; not proof of service availability or ownership.",
+        "dns_nxdomain": "The resolver returned NXDOMAIN at collection time.",
+        "dns_no_address": "No A/AAAA address records observed; other record types may exist.",
+        "dns_inconsistent": (
+            "Address and NXDOMAIN answers were inconsistent; validation is partial."
+        ),
+        "dns_wildcard_possible": (
+            "Wildcard DNS is possible; do not treat this as a confirmed unique host."
+        ),
+        "dns_wildcard_unchecked": "DNS answers observed but wildcard validation is incomplete.",
         "recon_status": "Run status",
         "recon_requests": "Request attempts used",
         "recon_limitations": (
@@ -134,9 +170,44 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_doctor": "Periksa kesiapan lingkungan lokal",
         "quick_json": "Dapatkan pemeriksaan lingkungan dalam JSON",
         "foundation": (
-            "M2A: inventaris URL berizin; kebijakan offline dan diagnostik tetap tersedia."
+            "M2B: discovery bersumber eksplisit dan inventaris URL berizin; "
+            "kebijakan offline tetap ada."
         ),
         "recon_title": "Inventaris DNS/HTTP",
+        "discovery_title": "Kandidat subdomain dan observasi DNS",
+        "discovery_domain": "Konteks domain",
+        "discovery_attempts": "Unit percobaan logis terpakai (bukan paket DNS)",
+        "discovery_counts": "Lookup RR DNS: {dns}; percobaan HTTP provider: {http}",
+        "discovery_limitations": (
+            "Kandidat bukan otorisasi atau bukti host hidup. Tanpa probing HTTP target."
+        ),
+        "provider_disclosure": "Query domain ke crt.sh dipilih dan diizinkan secara eksplisit.",
+        "invalid_domain": "Berikan domain valid, bukan URL, IP, kredensial atau wildcard.",
+        "invalid_discovery": "Pilih sumber eksplisit dan opsi input yang sesuai.",
+        "invalid_candidates": (
+            "Input kandidat invalid/terlalu besar; nama harus dalam batas domain."
+        ),
+        "candidates_io": "Input kandidat UTF-8 berbatas tidak dapat dibaca.",
+        "provider_consent_required": (
+            "crt.sh memerlukan --allow-provider-queries; domain dikirim ke pihak ketiga."
+        ),
+        "provider_invalid": (
+            "Provider mengembalikan JSON rusak/tidak didukung; kandidat tidak direka."
+        ),
+        "provider_unavailable": "Provider tidak mengembalikan HTTP 200; tanpa retry otomatis.",
+        "provider_invalid_rows": "Sebagian record provider rusak; koleksi parsial.",
+        "candidate_limit": "Batas kandidat/input tercapai; koleksi parsial.",
+        "source_complete": "Sumber terpilih diproses dalam batas yang dinyatakan.",
+        "candidate_collected": "Kandidat belum diverifikasi; DNS/konektivitas belum diperiksa.",
+        "wildcard_pattern": "Pola wildcard disimpan; bukan hostname konkret.",
+        "dns_resolved": "Record alamat diamati; bukan bukti layanan aktif atau kepemilikan.",
+        "dns_nxdomain": "Resolver mengembalikan NXDOMAIN saat pengumpulan.",
+        "dns_no_address": "Record alamat A/AAAA tidak ditemukan; tipe record lain mungkin ada.",
+        "dns_inconsistent": "Jawaban alamat dan NXDOMAIN tidak konsisten; validasi parsial.",
+        "dns_wildcard_possible": (
+            "DNS wildcard mungkin aktif; jangan anggap ini host unik terkonfirmasi."
+        ),
+        "dns_wildcard_unchecked": "Jawaban DNS diamati, tetapi pemeriksaan wildcard belum lengkap.",
         "recon_status": "Status proses",
         "recon_requests": "Percobaan request terpakai",
         "recon_limitations": (

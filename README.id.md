@@ -2,9 +2,10 @@
 
 [English](README.md)
 
-Reconnaissance & Exposure Analysis Framework. **Inventaris URL M2A, versi 0.1.0 (belum dirilis).**
-Koleksi DNS/HTTP berizin dari seed eksplisit, asal-usul bukti dan laporan JSON/TXT.
-Lihat [recon dan lab lokal](docs/id/recon.md) serta [scope](docs/id/configuration.md).
+Reconnaissance & Exposure Analysis Framework. **Discovery subdomain M2B, versi 0.1.0 (belum dirilis).**
+Kandidat dari sumber eksplisit, validasi DNS berscope opsional dan inventaris URL berizin.
+Lihat [subdomain](docs/id/discovery.md), [recon dan lab lokal](docs/id/recon.md),
+serta [scope](docs/id/configuration.md).
 Ini bukan pemindai kerentanan. Desain mengutamakan instalasi terisolasi,
 modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukti.
 
@@ -19,6 +20,8 @@ modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukt
   validasi DNS/redirect, verifikasi TLS, budget bersama, serta batas respons.
 - `scan` untuk batch URL eksplisit, bukti DNS/HTTP dan outcome parsial/error yang jelas.
 - JSON/TXT dari model bersama, penyamaran konservatif dan judul halaman opt-in.
+- `discover subdomains`: kandidat file/wordlist offline, query crt.sh opt-in,
+  validasi A/AAAA berscope serta observasi wildcard DNS berkualifikasi dan berbukti.
 - Lab lokal reproducible: `python -m pasopati.lab`; tanpa target eksternal.
 - pytest, Ruff, mypy, serta konfigurasi CI Linux/Windows untuk Python 3.12–3.14.
 
@@ -58,6 +61,7 @@ pasopati scope check https://example.invalid --config pasopati.toml --json
 pasopati profiles list --json
 pasopati profiles show safe --json
 pasopati scan --help
+pasopati discover subdomains --help
 ```
 
 Opsi global ditempatkan sebelum perintah. Doctor juga menerima `--config-dir PATH`.
@@ -69,6 +73,8 @@ Perintah kebijakan memakai 0 untuk berhasil/cocok, 1 untuk penolakan atau kegaga
 I/O/operasi, 2 untuk argumen/konfigurasi/profil invalid. Scope check tanpa DNS/koneksi.
 Baca [panduan singkat](docs/id/quick-start.md) dan [referensi lengkap](docs/id/commands.md).
 Untuk koleksi nyata, ikuti [panduan scan dan lab lokal](docs/id/recon.md).
+Untuk discovery pertama offline dan persetujuan provider eksplisit, ikuti
+[panduan subdomain](docs/id/discovery.md). Discovery tidak otomatis mengunjungi situs.
 `init` tetap passive/tanpa otorisasi. Scan memerlukan izin target, profil safe
 dan allowlist; exit 1 mencakup hasil parsial/ditolak/dilewati.
 
@@ -88,6 +94,11 @@ src/pasopati/
   profiles.py       batas profil bawaan immutable
   policy_cli.py     CLI konfigurasi/scope/profil offline
   transport.py      HTTP/HTTPS pinned, lifetime DNS, batas sumber daya
+  limits.py         budget percobaan logis/laju/deadline bersama
+  dns_client.py     respons A/AAAA berbatas dan hasil negatif
+  scoped_dns.py     DNS berscope dan pemeriksaan wildcard per parent
+  discovery_*.py    opsi sumber eksplisit, parsing berbatas dan CLI
+  discovery.py      orkestrasi bukti kandidat/DNS/provider
   scan_cli.py       perintah scan aktif eksplisit dan preflight
   recon.py          inventaris ternormalisasi, bukti dan outcome
   redaction.py      batas pelaporan URL/header/judul konservatif
@@ -97,7 +108,7 @@ src/pasopati/
 ```
 
 Lihat [konfigurasi](docs/id/configuration.md), [transport](docs/id/transport.md),
-dan [AGENTS.md](AGENTS.md). M2A memakai satu model inventaris JSON/TXT ternormalisasi.
+dan [AGENTS.md](AGENTS.md). Schema scan 1 dan discovery 2 memakai satu model JSON/TXT.
 Ekspor HTML, analisis kerentanan dan perbandingan historis masih tahap mendatang.
 
 ## Pengembangan dan pengujian
@@ -126,8 +137,8 @@ tersedia di [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 Lihat [roadmap kemampuan dan kriteria pembanding](docs/id/roadmap.md).
 Untuk dokumentasi Kali VirtualBox native, ikuti [panduan demo manual](docs/id/kali-vm-demo.md).
 
-Setelah M2A: discovery lebih luas melalui transport bersama dan kontrak bukti.
-Tahap berikutnya: discovery pasif; subdomain; inventaris sertifikat TLS;
+Setelah M2B: inventaris port/layanan eksplisit berbatas (M2C).
+Tahap berikutnya: provider discovery tambahan; inventaris sertifikat TLS;
 inventaris layanan, web/API; deteksi paparan/salah konfigurasi; intelijen CVE;
 temuan berbukti; analisis perbedaan; relasi aset; plugin; lab keamanan lokal yang
 reproducible tambahan; laporan HTML.
@@ -135,13 +146,14 @@ Perintah mandiri `report`, `diff`, dan `demo` masih rencana, belum terdaftar di 
 
 ## Screenshot dan demo
 
-Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
+Screenshot/GIF ditunda sampai fitur selesai. Rekam keluaran nyata mengikuti
 [panduan screenshot](docs/assets/screenshots/README.md) dan
 [panduan demo](docs/assets/demos/README.md). Tidak ada hasil pemindaian rekaan.
 
 ## Keterbatasan saat ini
 
-- Divalidasi di Windows 11/Python 3.12.10 dan Kali WSL2/Python 3.13.2. VM Kali
+- Validasi lokal M2B: masing-masing 243 tes di Windows 11/Python 3.12.10 dan Kali
+  WSL2/Python 3.13.2, serta entry point wheel baru dari luar checkout. VM Kali
   mandiri/terminal desktop native belum diverifikasi; hasil hosted ditautkan di atas.
 - Di mount Windows WSL, capture file-descriptor pytest gagal sebelum koleksi;
   `--capture=sys` berhasil menjalankan seluruh tes. Lihat checklist instalasi.
@@ -150,8 +162,12 @@ Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
 - Doctor menulis/menghapus berkas uji sementara di direktori konfigurasi atau induk
   terdekat yang tersedia. Tidak membuat konfigurasi permanen. Hasil bukan jaminan
   izin atau ruang penyimpanan tidak akan berubah.
-- Inventaris hanya URL eksplisit: tanpa crawling, discovery subdomain, pemeriksaan
-  CVE atau vonis kerentanan. Penyimpanan JSON/TXT memerlukan `--output` eksplisit.
+- Inventaris HTTP hanya URL eksplisit. Discovery subdomain menghasilkan kandidat,
+  bukan host otomatis berizin/hidup/unik. Tanpa crawling, pemeriksaan CVE atau vonis
+  kerentanan. Penyimpanan JSON/TXT memerlukan `--output` eksplisit.
+- crt.sh adalah disclosure pihak ketiga, opt-in dan bergantung ketersediaan. Jalurnya
+  diuji dengan fixture, bukan query publik live. Budget DNS menghitung lookup logis,
+  bukan paket retransmisi resolver. Lihat [batas discovery](docs/id/discovery.md).
 - Path non-root/query disamarkan; judul nonaktif secara default. Penyamaran heuristik
   tidak menjamin judul opt-in bebas dari informasi sensitif yang belum dikenal.
 - Scheduler awal sekuensial dan hanya mencoba IP tervalidasi pertama.
@@ -168,6 +184,7 @@ sebelum commit/publikasi. Jangan sertakan kredensial, diagnostik lokal, atau dat
 pemindaian sensitif. Operasi jaringan wajib memiliki izin target dan
 allowlist, validasi DNS/redirect, batas laju/concurrency/timeout/anggaran request,
 serta asal-usul bukti. Tidak boleh ada eksploitasi otomatis atau penyimpanan
-otomatis body sensitif. Hanya `scan` mengakses target; perintah kebijakan tetap offline.
+otomatis body sensitif. `scan` melakukan HTTP target; DNS/provider discovery harus
+opt-in eksplisit. Perintah kebijakan tetap offline.
 Tidak ada pemindaian target eksternal untuk validasi pengembangan.
 Keputusan lisensi perlu diselesaikan sebelum distribusi.

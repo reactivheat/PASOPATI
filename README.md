@@ -2,9 +2,10 @@
 
 [Bahasa Indonesia](README.id.md)
 
-Reconnaissance & Exposure Analysis Framework. **M2A URL inventory, version 0.1.0 (unreleased).**
-Authorized, explicit-seed DNS/HTTP collection with provenance and JSON/TXT reports.
-See [recon and the local lab](docs/en/recon.md) and [scope](docs/en/configuration.md).
+Reconnaissance & Exposure Analysis Framework. **M2B subdomain discovery, version 0.1.0 (unreleased).**
+Explicit-source candidates, optional scoped DNS validation and authorized URL inventory.
+See [subdomains](docs/en/discovery.md), [recon and the local lab](docs/en/recon.md),
+and [scope](docs/en/configuration.md).
 This is not a vulnerability scanner. The design favors isolated installation, small modules,
 predictable output, minimal dependencies, and evidence over unsupported findings.
 
@@ -19,6 +20,8 @@ predictable output, minimal dependencies, and evidence over unsupported findings
   DNS/redirect validation, TLS verification, shared budgets and bounded responses.
 - `scan` for explicit URL batches, DNS/HTTP evidence and honest partial/error outcomes.
 - Normalized JSON/TXT output, conservative redaction and opt-in title samples.
+- `discover subdomains`: offline file/wordlist candidates, opt-in crt.sh queries,
+  scoped A/AAAA validation and qualified wildcard DNS observations with provenance.
 - Reproducible local-only lab: `python -m pasopati.lab`; no external target required.
 - pytest, Ruff, mypy, and a Linux/Windows CI workflow for Python 3.12–3.14.
 
@@ -58,6 +61,7 @@ pasopati scope check https://example.invalid --config pasopati.toml --json
 pasopati profiles list --json
 pasopati profiles show safe --json
 pasopati scan --help
+pasopati discover subdomains --help
 ```
 
 Global options go before the command. Doctor additionally accepts `--config-dir PATH`.
@@ -68,6 +72,8 @@ Policy commands use 0 for success/match, 1 for denial or I/O/operational failure
 2 for invalid arguments/configuration/profile. Scope check never tests DNS/connectivity.
 Read the [quick start](docs/en/quick-start.md) and [full command reference](docs/en/commands.md).
 For actual collection, follow the [local lab and scan guide](docs/en/recon.md).
+For an offline first discovery run and explicit provider consent, follow
+[the subdomain guide](docs/en/discovery.md). Discovery does not auto-probe websites.
 `init` remains passive/unauthorized. Scanning requires explicit target authorization,
 safe profile and allowlisting; exit 1 includes partial/denied/skipped coverage.
 
@@ -87,6 +93,11 @@ src/pasopati/
   profiles.py       immutable built-in budgets
   policy_cli.py     offline configuration/scope/profile CLI
   transport.py      pinned HTTP/HTTPS, DNS lifetime, resource limits
+  limits.py         shared logical-attempt/rate/deadline budget
+  dns_client.py     bounded A/AAAA responses and negative results
+  scoped_dns.py     scope-aware DNS and per-parent wildcard checks
+  discovery_*.py    explicit source options, bounded parsing and CLI
+  discovery.py      candidate/DNS/provider evidence orchestration
   scan_cli.py       explicit active scan command and preflight
   recon.py          normalized inventory, evidence and outcomes
   redaction.py      conservative URL/header/title reporting boundary
@@ -96,7 +107,7 @@ src/pasopati/
 ```
 
 See [configuration](docs/en/configuration.md), [transport](docs/en/transport.md),
-and [AGENTS.md](AGENTS.md). M2A implements one normalized JSON/TXT inventory model.
+and [AGENTS.md](AGENTS.md). Scan schema 1 and discovery schema 2 share one JSON/TXT model.
 HTML export, vulnerability analysis and historical comparison remain future work.
 
 ## Development and tests
@@ -125,8 +136,8 @@ under [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 See the [capability roadmap and comparison criteria](docs/en/roadmap.md).
 For native Kali VirtualBox documentation, use the [manual demo guide](docs/en/kali-vm-demo.md).
 
-After M2A: broader scoped discovery using the shared transport/evidence contracts.
-Later: passive discovery; subdomains; TLS certificate inventory; service,
+After M2B: explicit bounded port/service inventory (M2C).
+Later: additional discovery providers; TLS certificate inventory; service,
 web/API inventory; exposure/misconfiguration detection; CVE intelligence;
 evidence-backed findings; differential analysis; asset relationships; plugins;
 additional reproducible labs; HTML reports.
@@ -134,13 +145,14 @@ Standalone `report`, `diff`, and `demo` remain planned, unregistered commands.
 
 ## Screenshots and demos
 
-No screenshots or videos are supplied yet. Capture genuine output following
+Screenshots/GIFs are deferred until feature work is complete. Capture genuine output following
 [screenshot guidance](docs/assets/screenshots/README.md) and
 [demo guidance](docs/assets/demos/README.md). No illustrative scan results are presented.
 
 ## Current limitations
 
-- Validated on Windows 11/Python 3.12.10 and Kali WSL2/Python 3.13.2. A standalone
+- M2B local validation: 243 tests each on Windows 11/Python 3.12.10 and Kali
+  WSL2/Python 3.13.2, plus fresh-wheel entry points outside the checkout. A standalone
   Kali VM/native desktop terminal is not yet verified; hosted results are linked above.
 - On a WSL Windows mount, pytest file-descriptor capture failed before collection;
   `--capture=sys` ran all tests successfully. See the installation checklist.
@@ -149,8 +161,12 @@ No screenshots or videos are supplied yet. Capture genuine output following
 - Doctor briefly writes/removes a temporary probe in the config directory or nearest
   existing ancestor. It creates no persistent configuration. This does not guarantee
   future writes after permissions or storage change.
-- Inventory covers explicit URLs only: no crawling, subdomain discovery, CVE checks
-  or vulnerability verdicts. JSON/TXT persistence requires explicit `--output`.
+- HTTP inventory covers explicit URLs only. Subdomain discovery returns candidates,
+  not automatically authorized/live/unique hosts. No crawling, CVE checks or vulnerability
+  verdicts. JSON/TXT persistence requires explicit `--output`.
+- crt.sh is a third-party disclosure, opt-in and availability-dependent. Its path is
+  fixture-tested, not validated by a live public query. DNS budgets count logical
+  lookups, not resolver retransmission packets. See [discovery limits](docs/en/discovery.md).
 - Non-root paths/queries are withheld; titles are off by default and heuristic
   redaction cannot guarantee that opt-in titles contain no unknown sensitive data.
 - The initial scheduler is sequential and probes only the first validated IP.
@@ -167,5 +183,6 @@ or publication. Do not include credentials, local diagnostics, or sensitive scan
 Network operations require explicit target authorization and allowlisting,
 DNS/redirect scope validation, bounded rates/concurrency/timeouts/request budgets,
 and evidence provenance. No automatic exploitation or sensitive-body persistence.
-Only `scan` performs target traffic; policy commands remain offline. No external
+`scan` performs target HTTP; discovery DNS/provider traffic is explicitly opt-in.
+Policy commands remain offline. No external
 targets were scanned for development validation. Licensing must be resolved before distribution.

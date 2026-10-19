@@ -5,79 +5,26 @@ import io
 import ipaddress
 import socket
 import ssl
-import threading
-import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Protocol, cast
 from urllib.parse import urljoin
 
-import dns.exception
-import dns.resolver
-
 from pasopati.config import Config
 from pasopati.core.errors import PolicyError
+from pasopati.dns_client import DNSResolver as DNSResolver
+from pasopati.limits import Clock as Clock
+from pasopati.limits import Deadline as Deadline
+from pasopati.limits import RequestBudget
+from pasopati.limits import SystemClock as SystemClock
 from pasopati.profiles import Profile, get_profile
 from pasopati.scope import Scope
 from pasopati.targets import Address, Target, parse_target
 
 
-class Clock(Protocol):
-    def monotonic(self) -> float: ...
-    def sleep(self, seconds: float) -> None: ...
-
-
-class SystemClock:
-    def monotonic(self) -> float:
-        return time.monotonic()
-
-    def sleep(self, seconds: float) -> None:
-        time.sleep(seconds)
-
-
-@dataclass(frozen=True)
-class Deadline:
-    end: float
-    clock: Clock
-
-    def remaining(self, limit: float | None = None) -> float:
-        remaining = self.end - self.clock.monotonic()
-        if remaining <= 0:
-            raise PolicyError("timeout")
-        return min(remaining, limit) if limit is not None else remaining
-
-
 class Resolver(Protocol):
     def resolve(self, host: str, timeout: float) -> tuple[Address, ...]: ...
-
-
-class DNSResolver:
-    """OS-configured DNS servers, explicit absolute queries, bounded A+AAAA lifetime."""
-
-    def resolve(self, host: str, timeout: float) -> tuple[Address, ...]:
-        end = time.monotonic() + timeout
-        try:
-            resolver = dns.resolver.Resolver()
-            # Do not allow a nameserver hostname/DoH URL to introduce an unbounded lookup.
-            for server in resolver.nameservers:
-                ipaddress.ip_address(str(server))
-            addresses: set[Address] = set()
-            for kind in ("A", "AAAA"):
-                left = end - time.monotonic()
-                if left <= 0:
-                    raise PolicyError("timeout")
-                answer = resolver.resolve(
-                    host + ".", kind, lifetime=left, search=False, raise_on_no_answer=False
-                )
-                addresses.update(ipaddress.ip_address(record.to_text()) for record in answer)
-            if not addresses:
-                raise PolicyError("dns_failed")
-            return tuple(sorted(addresses, key=lambda a: (a.version, int(a))))
-        except dns.exception.Timeout as exc:
-            raise PolicyError("timeout") from exc
-        except (dns.exception.DNSException, OSError, ValueError) as exc:
-            raise PolicyError("dns_failed") from exc
 
 
 class Exchange(Protocol):
@@ -251,49 +198,31 @@ class Session:
         resolver: Resolver | None = None,
         connector: Connector | None = None,
         clock: Clock | None = None,
+        budget: RequestBudget | None = None,
     ) -> None:
         self.config = config
         self.profile = get_profile(config.profile)
         self.scope = Scope(config)
         self.resolver = resolver or DNSResolver()
         self.connector = connector or SocketConnector()
-        self.clock = clock or SystemClock()
-        self._slots = threading.BoundedSemaphore(self.profile.concurrency)
-        self._lock = threading.Lock()
-        self._used = 0
-        self._next_request = 0.0
+        self.clock = clock or (budget.clock if budget is not None else SystemClock())
+        if budget is not None and (
+            budget.profile != self.profile or budget.clock is not self.clock
+        ):
+            raise PolicyError("invalid_config", 2)
+        self.budget = budget or RequestBudget(self.profile, self.clock)
 
     @property
     def requests_used(self) -> int:
-        with self._lock:
-            return self._used
+        return self.budget.used
 
     @contextmanager
     def slot(self, deadline: Deadline) -> Iterator[None]:
-        if not self._slots.acquire(timeout=deadline.remaining()):
-            raise PolicyError("timeout")
-        try:
+        with self.budget.slot(deadline):
             yield
-        finally:
-            self._slots.release()
 
     def _reserve(self, deadline: Deadline) -> None:
-        # Lock acquisition itself is part of the operation deadline.
-        if not self._lock.acquire(timeout=deadline.remaining()):
-            raise PolicyError("timeout")
-        try:
-            if self._used >= self.profile.request_budget:
-                raise PolicyError("budget_exhausted")
-            delay = max(0.0, self._next_request - self.clock.monotonic())
-            if delay >= deadline.remaining():
-                raise PolicyError("timeout")
-            if delay:
-                self.clock.sleep(delay)
-            deadline.remaining()
-            self._used += 1
-            self._next_request = self.clock.monotonic() + 1.0 / self.profile.requests_per_second
-        finally:
-            self._lock.release()
+        self.budget.reserve(deadline)
 
     def fetch(
         self,

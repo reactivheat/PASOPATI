@@ -128,16 +128,32 @@ def test_installed_entry_points_outside_checkout(outside_checkout: Path, module:
     command = [sys.executable, "-m", "pasopati"] if module else [executable]
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
+    env["PYTHONIOENCODING"] = "utf-8"
+    candidates = tmp_path / "candidates.txt"
+    candidates.write_text("api.example.invalid\n", encoding="utf-8")
     for arguments in (
         ["--help"],
         ["--version"],
         ["scan", "--help"],
+        ["discover", "subdomains", "--help"],
         ["doctor", "--json", "--config-dir", str(tmp_path / "config")],
         ["init", "--path", str(tmp_path / "policy.toml"), "--json"],
         ["config", "validate", "--config", str(tmp_path / "policy.toml"), "--json"],
         ["scope", "check", "example.invalid", "--config", str(tmp_path / "policy.toml"), "--json"],
         ["profiles", "list", "--json"],
         ["profiles", "show", "safe", "--json"],
+        [
+            "discover",
+            "subdomains",
+            "example.invalid",
+            "--source",
+            "file",
+            "--candidates-file",
+            str(candidates),
+            "--config",
+            str(tmp_path / "policy.toml"),
+            "--json",
+        ],
     ):
         process = subprocess.run(
             command + arguments,
@@ -152,5 +168,9 @@ def test_installed_entry_points_outside_checkout(outside_checkout: Path, module:
         assert process.returncode == 0, process.stdout + process.stderr
         assert not process.stderr
         if "--json" in arguments:
-            assert json.loads(process.stdout)["ok"] is True
+            payload = json.loads(process.stdout)
+            assert payload["ok"] is True
             assert "\x1b" not in process.stdout
+            if arguments[0] == "discover":
+                assert payload["schema_version"] == "2" and payload["requests_used"] == 0
+                assert payload["assets"][0]["target"] == "api.example.invalid"

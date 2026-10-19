@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — M2B
+
+- Add explicit-source `discover subdomains` with offline file/wordlist candidates,
+  optional disclosed crt.sh queries, strict input/provider bounds and source digests.
+- Add opt-in scoped A/AAAA validation, distinct negative/failure outcomes, actual
+  TTL/attempt evidence and bounded per-parent wildcard checks with qualified confidence.
+- Share logical budgets/rate/deadline controls across provider HTTP and DNS lookups;
+  provider policy never widens target scope or automatically probes discovered hosts.
+- Extend the common inventory model/renderers with discovery schema 2 while preserving
+  scan schema 1; keep empty valid provider results distinct from failed queries.
+- Add offline/loopback regressions, installed-entry-point discovery checks and bilingual
+  functional guides. Visual documentation remains deferred; no external target scan.
+
+No port/service engine, crawling, vulnerability analysis, package publication, tag,
+release or license selected. Version remains unreleased 0.1.0.
+
 ## Unreleased — M2A
 
 - Add authorized, explicit-seed `scan` with bounded UTF-8 batch input and deduplication.

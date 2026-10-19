@@ -5,6 +5,8 @@
 `scan` collects real responses from explicit, authorized HTTP/HTTPS URLs. This is
 inventory, not a vulnerability scanner, crawler, subdomain enumerator or CVE matcher.
 No network activity occurs when running `doctor`, `init`, `config`, `scope` or `profiles`.
+M2B [subdomain discovery](discovery.md) is a separate command, offline for local
+sources by default, with explicit DNS/provider opt-ins; `scan` does not invoke it.
 
 ## Authorization and input
 

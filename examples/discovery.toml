@@ -1,0 +1,12 @@
+# Offline example only. Network access remains disabled.
+schema_version = 1
+profile = "passive"
+authorized = false
+
+[scope]
+allow_domains = ["example.invalid", "*.example.invalid"]
+allow_cidrs = []
+exclude_domains = ["excluded.example.invalid"]
+exclude_cidrs = []
+ports = [80, 443]
+allow_private = false

@@ -45,3 +45,7 @@ terminal, then use the checked-in loopback-only examples from the checkout.
 Reports are JSON/TXT inventories, not vulnerability verdicts. Non-root paths and
 queries are withheld; titles require explicit opt-in. See [configuration](configuration.md)
 and [transport](transport.md).
+
+For the next capability, [subdomain discovery](discovery.md) starts offline with
+synthetic file/wordlist examples. Select sources explicitly; DNS and third-party
+queries are separate opt-ins, never automatic HTTP probing of discovered names.

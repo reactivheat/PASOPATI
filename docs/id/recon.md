@@ -5,6 +5,8 @@
 `scan` mengumpulkan respons nyata dari URL HTTP/HTTPS eksplisit yang berizin.
 Ini inventaris, bukan pemindai kerentanan, crawler, enumerator subdomain atau
 pencocok CVE. `doctor`, `init`, `config`, `scope`, dan `profiles` tetap offline.
+M2B [discovery subdomain](discovery.md) adalah perintah terpisah, default offline
+untuk sumber lokal dengan DNS/provider opt-in; `scan` tidak memanggilnya otomatis.
 
 ## Otorisasi dan input
 

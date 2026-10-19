@@ -1,9 +1,9 @@
-# Scope-aware transport (M1B, extended for M2A)
+# Scope-aware transport (M1B, shared by M2A/M2B)
 
 [Bahasa Indonesia](../id/transport.md) · [Configuration](configuration.md)
 
 `pasopati.transport.Session(config).fetch(url, method="GET")` is a Python API for
-M2A's [scan collector](recon.md) and future modules. It returns immutable
+M2A's [scan collector](recon.md) and M2B's fixed [CT provider](discovery.md). It returns immutable
 status/body/content-type, response-hop trace and a truncation flag in memory;
 it never writes bodies, cookies or headers to disk. Do not display/store raw
 bodies, URLs or transient header values. CLI policy commands never import the
@@ -36,7 +36,9 @@ ownership/legal permission. Every redirected destination is checked again.
 
 One Session shares 50 attempts, aggregate 1 request/second and concurrency 2.
 Budget is consumed before each attempted hop, including failed DNS/connect attempts.
-There are no automatic retries. Redirects (301/302/303/307/308) consume the same
+There are no application-level retries. The DNS resolver may retransmit or try
+configured nameservers within its bounded lifetime; attempts are not wire-packet
+counters. Redirects (301/302/303/307/308) consume the same
 budget/rate gate and retain the method; GET/HEAD need no body conversion. Relative
 locations work. Three redirects maximum; loops, missing locations, out-of-scope
 destinations, non-HTTP schemes and HTTPS downgrades are rejected. Headers are fixed
@@ -56,6 +58,13 @@ response and mark `body_truncated`; inventory coverage is partial. HEAD does not
 read a body. Only identity encoding is accepted;
 compressed responses are rejected rather than decompressed. No cookie jar, proxy
 environment, authentication negotiation, credential forwarding, persistence or logging.
+
+M2B extracts the real shared controls into `limits.RequestBudget` and bounded
+resolution into `dns_client.DNSResolver`; transport re-exports existing API names.
+`Session(config, budget=shared)` requires matching immutable profiles. Discovery
+uses the same budget for provider hops and individual target A/AAAA lookups, plus
+bounded wildcard checks. Its separate provider scope never expands target scope.
+Target DNS validation makes no candidate HTTP connection. See [discovery](discovery.md).
 
 ## Tests and limits
 

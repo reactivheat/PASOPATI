@@ -25,6 +25,11 @@
 | `scan --targets-file FILE --config FILE` | Validasi/deduplikasi batch URL berbatas |
 | `scan ... --output DIREKTORI_BARU` | Simpan JSON/TXT secara eksplisit, tidak menimpa |
 | `scan ... --include-titles` | Opt-in judul berbatas dengan penyamaran heuristik |
+| `discover subdomains DOMAIN --source file --candidates-file FILE` | Impor kandidat domain offline |
+| `discover subdomains DOMAIN --source wordlist --wordlist FILE` | Buat kandidat dari prefix relatif secara offline |
+| `discover subdomains DOMAIN --source crtsh --allow-provider-queries` | Query CT pihak ketiga eksplisit; wajib config safe/berizin |
+| `discover subdomains ... --resolve` | Opt-in A/AAAA berscope dan pemeriksaan wildcard berbatas |
+| `discover subdomains ... --config FILE --output DIREKTORI_BARU --json` | Model JSON/TXT bersama, schema discovery 2; tanpa overwrite |
 | `python -m pasopati.lab --port 8765` | Fixture HTTP lokal eksplisit, bukan subcommand CLI |
 
 Opsi global sebelum `doctor`, misalnya `pasopati --lang id --no-banner doctor`.
@@ -81,3 +86,10 @@ inventaris lengkap, bukan target aman. Exit 1 mencakup partial/denied/error/skip
 dan gagal output. Exit 2 berarti input/konfigurasi invalid; kesalahan aplikasi
 mendukung JSON, kesalahan parser Typer tetap teks. Laporan mencatat cakupan/bukti
 dan `vulnerability_assessment = "not_performed"`.
+
+Lihat [discovery subdomain](discovery.md) untuk sumber, budget, privasi dan confidence
+wildcard. File/wordlist default offline/belum terverifikasi; DNS/provider memerlukan
+otorisasi eksplisit dan scope cocok. Discovery memakai exit 0 untuk koleksi selesai
+(termasuk jawaban DNS negatif/CT kosong valid), 1 untuk partial/denied/skipped/error/
+output gagal dan 2 untuk input invalid. Tidak otomatis mengunjungi situs hasil
+discovery atau mengubah allowlist.

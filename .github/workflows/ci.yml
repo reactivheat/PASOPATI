@@ -48,26 +48,42 @@ jobs:
           cli = scripts / ('pasopati.exe' if os.name == 'nt' else 'pasopati')
           wheel = next(pathlib.Path('dist').glob('*.whl'))
           subprocess.run([str(python), '-m', 'pip', 'install', str(wheel)], check=True)
-          with tempfile.TemporaryDirectory() as outside:
+          with tempfile.TemporaryDirectory(dir='/tmp' if os.name == 'posix' else None) as outside:
+              assert not pathlib.Path(outside).resolve().is_relative_to(pathlib.Path.cwd().resolve())
               env = dict(os.environ)
               env.pop('PYTHONPATH', None)
+              env['PYTHONIOENCODING'] = 'utf-8'
               for index, command in enumerate(([str(cli)], [str(python), '-m', 'pasopati'])):
                   policy = str(pathlib.Path(outside) / f'policy-{index}.toml')
+                  candidates = pathlib.Path(outside) / f'candidates-{index}.txt'
+                  candidates.write_text('api.example.invalid\n', encoding='utf-8')
+                  discovery_output = pathlib.Path(outside) / f'discovery-{index}'
                   for args in (['--version'], ['--help'], ['doctor', '--json', '--config-dir', outside],
                                ['scan', '--help'],
+                               ['discover', 'subdomains', '--help'],
                                ['init', '--path', policy, '--json'],
                                ['config', 'validate', '--config', policy, '--json'],
                                ['scope', 'check', 'example.invalid', '--config', policy, '--json'],
-                               ['profiles', 'list', '--json'], ['profiles', 'show', 'safe', '--json']):
+                               ['profiles', 'list', '--json'], ['profiles', 'show', 'safe', '--json'],
+                               ['discover', 'subdomains', 'example.invalid', '--source', 'file',
+                                '--candidates-file', str(candidates), '--config', policy,
+                                '--output', str(discovery_output), '--json']):
                       result = subprocess.run(command + args, cwd=outside, env=env, check=True,
                                               capture_output=True, text=True, encoding='utf-8', timeout=30)
                       assert not result.stderr, result.stderr
                       if '--json' in args:
-                          assert json.loads(result.stdout)['ok'] is True
+                          payload = json.loads(result.stdout)
+                          assert payload['ok'] is True
                           assert '\x1b' not in result.stdout
+                          if args[0] == 'discover':
+                              assert payload['schema_version'] == '2' and payload['requests_used'] == 0
+                              assert payload['assets'][0]['target'] == 'api.example.invalid'
+                              assert json.loads((discovery_output / 'report.json').read_text(encoding='utf-8')) == payload
+                              assert (discovery_output / 'report.txt').is_file()
               subprocess.run([str(python), '-c',
-                              'import pathlib, sys, pasopati.recon; '
-                              'assert pathlib.Path(pasopati.recon.__file__).is_relative_to(sys.prefix)'],
+                              'import pathlib, sys, pasopati.recon, pasopati.discovery; '
+                              'assert pathlib.Path(pasopati.recon.__file__).is_relative_to(sys.prefix); '
+                              'assert pathlib.Path(pasopati.discovery.__file__).is_relative_to(sys.prefix)'],
                              cwd=outside, env=env, check=True)
               with ThreadingHTTPServer(('127.0.0.1', 0), LabHandler) as server:
                   worker = threading.Thread(target=server.serve_forever,

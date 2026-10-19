@@ -9,28 +9,30 @@ verifikasi yang dapat diulang, bukan berarti pemindaian hanya bisa offline.
 
 ## Kemampuan aktual, bukan pemasaran
 
-| Fungsi | PASOPATI M2A | Tahap berikutnya |
+| Fungsi | PASOPATI M2B | Tahap berikutnya |
 | --- | --- | --- |
 | Inventaris URL eksplisit berizin | Ada, DNS/HTTP/HTTPS berbatas | Perluas metadata secara teruji |
 | Bukti, scope, batas bersama, JSON/TXT | Ada | Korelasi dan perbandingan run |
-| Enumerasi subdomain | Belum ada | Discovery kandidat dan validasi DNS |
+| Enumerasi subdomain | Kandidat file/wordlist/crt.sh eksplisit; DNS/wildcard berscope opt-in | Provider tambahan dan pengukuran cakupan terpisah |
 | Inventaris host/port/layanan | Belum ada | TCP-connect eksplisit berbatas |
 | Inventaris sertifikat TLS | Belum ada; verifikasi sertifikat wajib | Ekstrak metadata tervalidasi |
 | Validasi kerentanan/CVE | Tidak dilakukan | Pemeriksaan berbukti dengan acceptance criteria sendiri |
 | HTML, histori/diff | Belum ada | Renderer model bersama, bukan inferensi di renderer |
 
 [Panduan Nmap](https://nmap.org/book/man.html) mendokumentasikan discovery host,
-scan port, deteksi layanan/versi dan OS, serta fungsi lain. M2A tidak menerapkan
+scan port, deteksi layanan/versi dan OS, serta fungsi lain. M2B tidak menerapkan
 engine tersebut. [Sublist3r](https://github.com/aboul3la/Sublist3r) adalah alat
-enumerasi subdomain; M2A belum mengenumerasi subdomain. Keduanya referensi, bukan
+enumerasi subdomain; M2B kini memiliki discovery berbatas sendiri, bukan klaim
+kesetaraan cakupan atau kecepatan. Keduanya referensi, bukan
 dependensi bawaan, integrasi terverifikasi atau alat yang sudah dikalahkan benchmark.
 
-## Usulan milestone, bukan fitur aktif
+## Cakupan terimplementasi dan usulan milestone selanjutnya
 
-1. **M2B — discovery domain/subdomain.** Pemilihan provider eksplisit dan penjelasan
-   query yang dikirim ke pihak ketiga, budget provider berbatas, provenance dan
-   deduplikasi. Validasi DNS serta batas label; nama hasil discovery adalah kandidat,
-   bukan target otomatis berizin. Tanpa probing aktif di luar scope yang disetujui.
+1. **M2B — discovery domain/subdomain terimplementasi.** Lihat [panduan fungsional](discovery.md).
+   Sumber file/wordlist/crt.sh eksplisit, disclosure provider, budget logis bersama,
+   provenance/digest, pemeriksaan batas label serta A/AAAA/wildcard opt-in.
+   Nama hasil discovery tetap kandidat, bukan target otomatis berizin; tanpa HTTP
+   otomatis. Fixture memverifikasi perilaku, bukan ketersediaan provider publik.
 2. **M2C — inventaris port/layanan.** Mulai dengan TCP-connect tanpa admin ke alamat/
    port yang diizinkan. Gunakan scope, pinning numerik, deadline, laju/concurrency/
    budget dan cleanup bersama. Timeout bukan otomatis port open/closed. Adaptor

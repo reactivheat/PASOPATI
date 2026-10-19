@@ -1,0 +1,5 @@
+# Synthetic candidates, not confirmed live hosts.
+api.example.invalid
+www.example.invalid
+*.wild.example.invalid
+excluded.example.invalid

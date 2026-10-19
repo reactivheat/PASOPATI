@@ -25,6 +25,11 @@
 | `scan --targets-file FILE --config FILE` | Validate/deduplicate a bounded URL batch |
 | `scan ... --output NEW_DIRECTORY` | Explicit JSON/TXT files, never overwrite |
 | `scan ... --include-titles` | Opt into bounded, heuristically redacted titles |
+| `discover subdomains DOMAIN --source file --candidates-file FILE` | Import domain candidates offline |
+| `discover subdomains DOMAIN --source wordlist --wordlist FILE` | Generate candidates from relative prefixes offline |
+| `discover subdomains DOMAIN --source crtsh --allow-provider-queries` | Explicit third-party CT query; safe/authorized config required |
+| `discover subdomains ... --resolve` | Opt into scoped A/AAAA and bounded wildcard checks |
+| `discover subdomains ... --config FILE --output NEW_DIRECTORY --json` | Common JSON/TXT model, discovery schema 2; no overwrite |
 | `python -m pasopati.lab --port 8765` | Explicit local-only HTTP fixture, not a CLI subcommand |
 
 Global options go before `doctor`, e.g. `pasopati --lang id --no-banner doctor`.
@@ -81,3 +86,10 @@ means complete inventory, not secure targets. Exit 1 includes partial/denied/err
 skipped coverage and output failure. Exit 2 means invalid input/configuration;
 application failures support JSON, Typer parser failures remain text. Reports
 include coverage/provenance and `vulnerability_assessment = "not_performed"`.
+
+See [subdomain discovery](discovery.md) for source selection, budgets, privacy and
+wildcard confidence. Local file/wordlist discovery defaults to offline/unverified;
+DNS/provider operations require explicit authorization and matching scope. Discovery
+uses exit 0 for completed collection (including valid negative DNS/empty CT results),
+1 for partial/denied/skipped/error/output failure and 2 for invalid inputs. It never
+automatically probes discovered websites or changes the allowlist.

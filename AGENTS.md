@@ -6,8 +6,10 @@ M1A implements packaging, CLI presentation, EN/ID messages, and offline local
 environment diagnostics. M1B adds strict TOML, scope checks, built-in profiles,
 and bounded HTTP/HTTPS transport. M2A adds explicit-seed DNS/HTTP inventory through
 `scan`, normalized provenance/observations, JSON/TXT output and a loopback lab.
+M2B adds explicit-source `discover subdomains`: local candidate/wordlist input,
+opt-in crt.sh queries and scope-checked A/AAAA/wildcard observations.
 Registered commands are `doctor`, `init`, `config validate`, `scope check`,
-`profiles list/show` and `scan`. Do not add crawling, subdomain enumeration,
+`profiles list/show`, `scan` and `discover subdomains`. Do not add crawling, port scanning,
 vulnerability checks, databases, plugins or empty engines until requested.
 Planned standalone commands: `report`, `diff`, `demo`.
 
@@ -67,7 +69,25 @@ this with a check followed by a client that resolves again. dnspython is require
 bounded DNS lifetime; do not use blocking getaddrinfo with a post-hoc timeout check.
 Keep TLS verification/original SNI, immutable passive/safe profiles and shared per-session
 rate/concurrency/request budgets. No proxy, auth, cookie, TLS key log or body persistence.
-All CLI policy commands stay offline; only explicit `scan` performs target traffic.
+All CLI policy commands stay offline. `scan` performs explicit target HTTP traffic;
+`discover subdomains` is offline by default for file/wordlist sources. --resolve
+opts into DNS; crtsh requires explicit source selection and --allow-provider-queries.
+Provider queries disclose the domain to a third party, require safe/authorized
+configuration and an explicitly allowed base domain. Never silently add *.DOMAIN.
+Provider Session has a separate exact crt.sh:443 policy with no private addresses;
+it does not widen target scope. No custom provider URL/headers/credentials CLI.
+limits.RequestBudget is shared by provider HTTP hops and DNS RR lookups. Limits
+count logical attempts, not DNS wire retransmissions; lifetimes are bounded.
+Wildcard probes require scope, three random labels per immediate parent and at
+most four probed parents. Qualify possible/unchecked wildcard results; never
+materialize certificate wildcard patterns as actual hosts. No automatic target HTTP.
+Candidate inputs and provider JSON are bounded, deduplicated and label-boundary
+checked before use. Preserve source/reference/digest and real DNS/attempt evidence;
+NXDOMAIN, no A/AAAA, timeout and provider failure are distinct outcomes.
+M2A JSON shape stays schema 1; discovery uses schema 2 in the same RunReport and
+JSON/TXT renderers. DNS query_name/query_type and candidate subject_name are not URLs.
+No raw provider body, local source path, cookies, credentials or arbitrary fields
+in reports. Existing output directories are refused before provider construction.
 The owner's permission to develop/push is NOT authorization for arbitrary targets.
 `scan` requires authorized=true, a network-enabled profile and scope allowlisting.
 Validate the entire bounded URL batch and reserve new report output before traffic.
@@ -99,7 +119,7 @@ interpolation. Test these controls offline against local fixtures before live us
 
 ## Future report contract
 
-M2A implements the JSON/TXT inventory subset below. Findings remain empty and
+M2A/M2B implement the JSON/TXT inventory subset below (scan schema 1, discovery 2). Findings remain empty and
 vulnerability_assessment is not_performed; HTML/analysis/import/diff are future work.
 
 One normalized, versioned data model must feed every renderer, including assets,

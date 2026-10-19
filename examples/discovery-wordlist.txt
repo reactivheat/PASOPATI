@@ -1,0 +1,4 @@
+# Relative prefixes. No DNS traffic unless --resolve is explicitly enabled.
+www
+api
+dev.api
