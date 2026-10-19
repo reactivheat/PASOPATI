@@ -23,6 +23,23 @@ class Scope:
     def address(self, address: Address) -> Decision:
         if any(address in n for n in self.excluded_networks):
             return Decision(False, "excluded")
+        # Stable conservative special-use policy even on older Python registry snapshots.
+        special = any(
+            address in ipaddress.ip_network(n)
+            for n in (
+                "0.0.0.0/8",
+                "100.64.0.0/10",
+                "192.0.0.0/24",
+                "192.0.2.0/24",
+                "192.88.99.0/24",
+                "198.18.0.0/15",
+                "198.51.100.0/24",
+                "203.0.113.0/24",
+                "2001:db8::/32",
+                "3fff::/20",
+                "100::/64",
+            )
+        )
         # Transition mechanisms and mapped addresses are rejected rather than reinterpreted.
         transition = isinstance(address, ipaddress.IPv6Address) and (
             address.ipv4_mapped is not None
@@ -37,6 +54,7 @@ class Scope:
             or (address.is_reserved and not address.is_loopback)
             or address.is_link_local
             or transition
+            or special
             or address == ipaddress.ip_address("255.255.255.255")
         ):
             return Decision(False, "address_forbidden")

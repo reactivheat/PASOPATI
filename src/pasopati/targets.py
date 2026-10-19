@@ -2,6 +2,7 @@
 
 import ipaddress
 import re
+import unicodedata
 from dataclasses import dataclass
 from urllib.parse import quote, urlsplit
 
@@ -15,7 +16,7 @@ def hostname(value: str) -> str:
     if (
         not value
         or value != value.strip()
-        or any(ord(c) <= 32 or ord(c) >= 127 for c in value if ord(c) < 128)
+        or any(ord(c) <= 32 or unicodedata.category(c).startswith("C") for c in value)
     ):
         raise PolicyError("invalid_target", 2)
     if any(c in value for c in "%/@\\?#"):
@@ -74,7 +75,11 @@ class Target:
 
 
 def parse_target(value: str, *, require_url: bool = False) -> Target:
-    if not value or any(ord(c) <= 32 or ord(c) == 127 for c in value) or "\\" in value:
+    if (
+        not value
+        or any(ord(c) <= 32 or unicodedata.category(c).startswith("C") for c in value)
+        or "\\" in value
+    ):
         raise PolicyError("invalid_target", 2)
     if "://" not in value:
         if require_url:

@@ -15,6 +15,7 @@ coverage.xml
 /.local/
 /reports/
 /scan-data/
+/pasopati.toml
 *.db
 *.sqlite
 *.sqlite3

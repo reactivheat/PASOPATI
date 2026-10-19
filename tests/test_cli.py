@@ -3,6 +3,9 @@ import os
 import shutil
 import subprocess
 import sys
+import sysconfig
+import tempfile
+from collections.abc import Iterator
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
@@ -14,6 +17,17 @@ from pasopati.branding import BANNER
 from pasopati.cli import app
 
 runner = CliRunner()
+
+
+@pytest.fixture
+def outside_checkout() -> Iterator[Path]:
+    # POSIX TMPDIR may deliberately point into .local; this check must be outside.
+    with tempfile.TemporaryDirectory(
+        prefix="pasopati-entry-", dir="/tmp" if os.name == "posix" else None
+    ) as directory:
+        path = Path(directory)
+        assert not path.resolve().is_relative_to(Path(__file__).resolve().parents[1])
+        yield path
 
 
 def test_root_and_banner_suppression() -> None:
@@ -105,8 +119,9 @@ def test_missing_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.parametrize("module", [False, True], ids=["executable", "module"])
-def test_installed_entry_points_outside_checkout(tmp_path: Path, module: bool) -> None:
-    executable = shutil.which("pasopati", path=str(Path(sys.executable).parent))
+def test_installed_entry_points_outside_checkout(outside_checkout: Path, module: bool) -> None:
+    tmp_path = outside_checkout
+    executable = shutil.which("pasopati", path=sysconfig.get_path("scripts"))
     assert executable is not None, "Install the package before running tests"
     command = [sys.executable, "-m", "pasopati"] if module else [executable]
     env = dict(os.environ)
@@ -115,6 +130,11 @@ def test_installed_entry_points_outside_checkout(tmp_path: Path, module: bool) -
         ["--help"],
         ["--version"],
         ["doctor", "--json", "--config-dir", str(tmp_path / "config")],
+        ["init", "--path", str(tmp_path / "policy.toml"), "--json"],
+        ["config", "validate", "--config", str(tmp_path / "policy.toml"), "--json"],
+        ["scope", "check", "example.invalid", "--config", str(tmp_path / "policy.toml"), "--json"],
+        ["profiles", "list", "--json"],
+        ["profiles", "show", "safe", "--json"],
     ):
         process = subprocess.run(
             command + arguments,

@@ -91,6 +91,8 @@ def test_wildcard_not_apex_and_idna() -> None:
         "2130706433",
         "0x7f000001",
         "::1%lo",
+        "https://exam\u200bple.invalid",
+        "https://example.invalid/\u0080",
         "http://user:password@example.invalid",
         "http://example.invalid:",
         "http://example.invalid:0",
@@ -122,6 +124,8 @@ def test_invalid_targets(target: str) -> None:
         ("100.64.0.1", False),
         ("::ffff:127.0.0.1", False),
         ("64:ff9b::7f00:1", False),
+        ("3fff::1", False),
+        ("192.0.0.8", False),
     ],
 )
 def test_lab_addresses(target: str, allowed: bool) -> None:

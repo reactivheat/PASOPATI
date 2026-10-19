@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Reconnaissance & Exposure Analysis Framework — CLI foundation"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["typer>=0.16,<1", "rich>=14,<15"]
+dependencies = ["typer>=0.16,<1", "rich>=14,<15", "dnspython>=2.8,<3"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
