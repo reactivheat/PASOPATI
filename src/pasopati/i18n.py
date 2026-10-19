@@ -15,10 +15,23 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_help": "List commands and options",
         "quick_doctor": "Check local environment readiness",
         "quick_json": "Get machine-readable environment checks",
-        "foundation": (
-            "M2B: explicit-source discovery and authorized URL inventory; offline policy remains."
-        ),
+        "foundation": ("M2C: scoped TCP, subdomain and URL inventory; offline policy remains."),
         "recon_title": "DNS/HTTP inventory",
+        "tcp_title": "Explicit TCP-connect inventory",
+        "tcp_limitations": "No payloads or service identification. Timeout is not closed/filtered.",
+        "tcp_counts": "DNS RR lookup attempts: {dns}; TCP connect attempts: {tcp}",
+        "invalid_hosts": "Provide 1-64 explicit domains/IPs; no URLs, CIDRs or host:port entries.",
+        "invalid_ports": (
+            "Provide 1-64 comma-separated ports (1-65535); at most 256 host/port pairs."
+        ),
+        "tcp_complete": "All authorized resolved endpoints completed open/refused observation.",
+        "tcp_address_limit": "Too many DNS addresses; no subset was silently probed.",
+        "tcp_timeout": "TCP connect timed out; port state remains unknown.",
+        "tcp_deadline_exceeded": "Connect exceeded its deadline; port state remains unknown.",
+        "tcp_unreachable": "OS reported unreachable; no open/closed/filtered inference.",
+        "tcp_reset": "Connection reset; no open/closed service verdict.",
+        "tcp_local_error": "Local permission/resource/family error; no target-state verdict.",
+        "tcp_error": "TCP attempt failed; no target-state verdict.",
         "discovery_title": "Subdomain candidates and DNS observations",
         "discovery_domain": "Domain context",
         "discovery_attempts": "Logical attempt units used (not DNS packets)",
@@ -170,10 +183,24 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_doctor": "Periksa kesiapan lingkungan lokal",
         "quick_json": "Dapatkan pemeriksaan lingkungan dalam JSON",
         "foundation": (
-            "M2B: discovery bersumber eksplisit dan inventaris URL berizin; "
-            "kebijakan offline tetap ada."
+            "M2C: inventaris TCP, subdomain dan URL berscope; kebijakan offline tetap ada."
         ),
         "recon_title": "Inventaris DNS/HTTP",
+        "tcp_title": "Inventaris TCP-connect eksplisit",
+        "tcp_limitations": "Tanpa payload/identifikasi layanan. Timeout bukan closed/filtered.",
+        "tcp_counts": "Percobaan lookup RR DNS: {dns}; percobaan TCP connect: {tcp}",
+        "invalid_hosts": "Berikan 1-64 domain/IP eksplisit; tanpa URL, CIDR atau host:port.",
+        "invalid_ports": (
+            "Berikan 1-64 port dipisah koma (1-65535); maksimal 256 pasangan host/port."
+        ),
+        "tcp_complete": "Semua endpoint teresolusi berizin selesai diobservasi open/refused.",
+        "tcp_address_limit": "Alamat DNS terlalu banyak; tidak diam-diam memprobe subset.",
+        "tcp_timeout": "TCP connect timeout; keadaan port belum diketahui.",
+        "tcp_deadline_exceeded": "Connect melewati deadline; keadaan port belum diketahui.",
+        "tcp_unreachable": "OS melaporkan unreachable; tanpa inferensi open/closed/filtered.",
+        "tcp_reset": "Koneksi direset; tanpa vonis layanan open/closed.",
+        "tcp_local_error": "Kesalahan izin/resource/family lokal; tanpa vonis keadaan target.",
+        "tcp_error": "Percobaan TCP gagal; tanpa vonis keadaan target.",
         "discovery_title": "Kandidat subdomain dan observasi DNS",
         "discovery_domain": "Konteks domain",
         "discovery_attempts": "Unit percobaan logis terpakai (bukan paket DNS)",

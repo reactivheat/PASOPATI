@@ -49,3 +49,7 @@ and [transport](transport.md).
 For the next capability, [subdomain discovery](discovery.md) starts offline with
 synthetic file/wordlist examples. Select sources explicitly; DNS and third-party
 queries are separate opt-ins, never automatic HTTP probing of discovered names.
+
+M2C [TCP inventory](ports.md) uses explicit hosts and ports, the same authorization/
+scope/limits, and numeric connects with no application payload or service guesses.
+The existing loopback lab supports a first `ports` run too.

@@ -25,6 +25,9 @@
 | `scan --targets-file FILE --config FILE` | Validate/deduplicate a bounded URL batch |
 | `scan ... --output NEW_DIRECTORY` | Explicit JSON/TXT files, never overwrite |
 | `scan ... --include-titles` | Opt into bounded, heuristically redacted titles |
+| `ports HOST --ports 22,80,443 --config FILE [--json]` | Authorized, explicit TCP connects; no payloads or service guesses |
+| `ports --targets-file FILE --ports 80,443 --config FILE` | Bounded host/IP list, not URL/CIDR/range expansion |
+| `ports ... --output NEW_DIRECTORY` | Common JSON/TXT model, TCP schema 3, never overwrite |
 | `discover subdomains DOMAIN --source file --candidates-file FILE` | Import domain candidates offline |
 | `discover subdomains DOMAIN --source wordlist --wordlist FILE` | Generate candidates from relative prefixes offline |
 | `discover subdomains DOMAIN --source crtsh --allow-provider-queries` | Explicit third-party CT query; safe/authorized config required |
@@ -93,3 +96,8 @@ DNS/provider operations require explicit authorization and matching scope. Disco
 uses exit 0 for completed collection (including valid negative DNS/empty CT results),
 1 for partial/denied/skipped/error/output failure and 2 for invalid inputs. It never
 automatically probes discovered websites or changes the allowlist.
+
+See [TCP inventory](ports.md) for authorization, pinned DNS snapshots, logical
+budgets and state semantics. Exit 0 means complete open/refused collection, not
+all ports open or targets secure; unknown/partial/denied/skipped/DNS/output failure
+exits 1 and invalid input/configuration exits 2. Service identification is not performed.

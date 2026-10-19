@@ -7,6 +7,8 @@ Ini inventaris, bukan pemindai kerentanan, crawler, enumerator subdomain atau
 pencocok CVE. `doctor`, `init`, `config`, `scope`, dan `profiles` tetap offline.
 M2B [discovery subdomain](discovery.md) adalah perintah terpisah, default offline
 untuk sumber lokal dengan DNS/provider opt-in; `scan` tidak memanggilnya otomatis.
+M2C [inventaris TCP](ports.md) juga perintah eksplisit terpisah; scan tidak otomatis
+mengenumerasi port dan endpoint TCP open bukan vonis layanan.
 
 ## Otorisasi dan input
 

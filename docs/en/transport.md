@@ -1,4 +1,4 @@
-# Scope-aware transport (M1B, shared by M2A/M2B)
+# Scope-aware HTTP transport (M1B, shared by M2A/M2B)
 
 [Bahasa Indonesia](../id/transport.md) · [Configuration](configuration.md)
 
@@ -65,6 +65,11 @@ resolution into `dns_client.DNSResolver`; transport re-exports existing API name
 uses the same budget for provider hops and individual target A/AAAA lookups, plus
 bounded wildcard checks. Its separate provider scope never expands target scope.
 Target DNS validation makes no candidate HTTP connection. See [discovery](discovery.md).
+
+M2C [TCP inventory](ports.md) reuses Scope, ScopedDNS, Deadline and RequestBudget,
+not the HTTP connector. Its numeric-only TCP connector sends/reads no application
+data and always closes sockets. Do not replace it with hostname `create_connection`
+or infer services from port numbers. HTTP/TCP reports share the normalized model.
 
 ## Tests and limits
 

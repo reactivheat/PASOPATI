@@ -9,19 +9,20 @@ verification environment, not a restriction that scanning works only offline.
 
 ## Present capability, not marketing
 
-| Function | PASOPATI M2B | Next work |
+| Function | PASOPATI M2C | Next work |
 | --- | --- | --- |
 | Explicit authorized URL inventory | Implemented, bounded DNS/HTTP/HTTPS | Extend metadata carefully |
 | Evidence, scope, shared limits, JSON/TXT | Implemented | Correlation and run comparison |
 | Subdomain enumeration | Explicit file/wordlist/crt.sh candidates; opt-in scoped DNS/wildcard checks | Additional providers and separately measured coverage |
-| Host/port/service inventory | Not implemented | Explicit bounded TCP-connect inventory |
+| Explicit TCP port inventory | Implemented, bounded numeric connects and qualified outcomes | Protocol/service metadata requires separate observations |
 | TLS certificate inventory | Not implemented; certificate verification is enforced | Extract verified metadata |
 | Vulnerability/CVE validation | Not performed | Evidence-based checks with separate acceptance criteria |
 | HTML reports, history/diff | Not implemented | Render the normalized model, never infer in renderers |
 
 [Nmap's reference guide](https://nmap.org/book/man.html) documents host discovery,
-port scanning, service/version and OS detection, among other functions. M2B does
-not implement those engines. [Sublist3r](https://github.com/aboul3la/Sublist3r) is a
+port scanning, service/version and OS detection, among other functions. M2C adds
+TCP-connect only, not raw/SYN/UDP, host discovery, service/version or OS detection.
+[Sublist3r](https://github.com/aboul3la/Sublist3r) is a
 subdomain enumeration tool; M2B now has its own bounded discovery workflow, not a
 claim of equal coverage or speed. These projects are
 references, not bundled dependencies, validated integrations or defeated benchmarks.
@@ -33,11 +34,11 @@ references, not bundled dependencies, validated integrations or defeated benchma
    provenance/digests, label-boundary checks and opt-in A/AAAA/wildcard observations.
    Discovered names remain candidates, not automatically authorized targets; no
    automatic HTTP probing. Fixtures verify behavior, not public-provider availability.
-2. **M2C — port/service inventory.** Start with unprivileged TCP-connect checks to
-   explicitly allowed addresses/ports. Share scope, numeric pinning, deadlines,
-   rate/concurrency/attempt budgets and cleanup controls. Do not mislabel timeouts
-   as open/closed. Any external-tool adapter needs separate review, numeric targets,
-   fixed argument arrays, bounded output/time and no shell or arbitrary NSE scripts.
+2. **M2C — implemented TCP port inventory.** See [the guide](ports.md). Explicit
+   hosts/ports, all-answer validation, numeric connects, shared DNS/TCP budgets and
+   qualified open/refused/unknown outcomes. No payloads, service/version guessing,
+   raw/UDP probes or tool adapter. Service identification remains not_performed;
+   application metadata is a later, separately evidenced capability.
 3. **M2D — deeper web/TLS observations.** Verified certificate metadata, bounded
    endpoint mapping and transparent fingerprint rules with confidence. Metadata
    hints are not proof of a vulnerable version; no automatic exploitation.

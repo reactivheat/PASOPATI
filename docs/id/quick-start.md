@@ -48,3 +48,7 @@ Path non-root/query disamarkan; judul memerlukan opt-in. Lihat
 Kemampuan berikutnya, [discovery subdomain](discovery.md), dimulai offline dengan
 contoh file/wordlist sintetis. Pilih sumber eksplisit; DNS dan query pihak ketiga
 merupakan opt-in terpisah, bukan HTTP otomatis ke nama hasil discovery.
+
+M2C [inventaris TCP](ports.md) memakai host/port eksplisit, otorisasi/scope/batas
+bersama dan koneksi numerik tanpa payload aplikasi atau tebakan layanan.
+Lab loopback yang sudah ada juga mendukung run `ports` pertama.

@@ -9,19 +9,20 @@ verifikasi yang dapat diulang, bukan berarti pemindaian hanya bisa offline.
 
 ## Kemampuan aktual, bukan pemasaran
 
-| Fungsi | PASOPATI M2B | Tahap berikutnya |
+| Fungsi | PASOPATI M2C | Tahap berikutnya |
 | --- | --- | --- |
 | Inventaris URL eksplisit berizin | Ada, DNS/HTTP/HTTPS berbatas | Perluas metadata secara teruji |
 | Bukti, scope, batas bersama, JSON/TXT | Ada | Korelasi dan perbandingan run |
 | Enumerasi subdomain | Kandidat file/wordlist/crt.sh eksplisit; DNS/wildcard berscope opt-in | Provider tambahan dan pengukuran cakupan terpisah |
-| Inventaris host/port/layanan | Belum ada | TCP-connect eksplisit berbatas |
+| Inventaris port TCP eksplisit | Ada, koneksi numerik berbatas dan outcome berkualifikasi | Metadata protokol/layanan perlu observasi terpisah |
 | Inventaris sertifikat TLS | Belum ada; verifikasi sertifikat wajib | Ekstrak metadata tervalidasi |
 | Validasi kerentanan/CVE | Tidak dilakukan | Pemeriksaan berbukti dengan acceptance criteria sendiri |
 | HTML, histori/diff | Belum ada | Renderer model bersama, bukan inferensi di renderer |
 
 [Panduan Nmap](https://nmap.org/book/man.html) mendokumentasikan discovery host,
-scan port, deteksi layanan/versi dan OS, serta fungsi lain. M2B tidak menerapkan
-engine tersebut. [Sublist3r](https://github.com/aboul3la/Sublist3r) adalah alat
+scan port, deteksi layanan/versi dan OS, serta fungsi lain. M2C menambah TCP-connect
+saja, bukan raw/SYN/UDP, discovery host, deteksi layanan/versi atau OS.
+[Sublist3r](https://github.com/aboul3la/Sublist3r) adalah alat
 enumerasi subdomain; M2B kini memiliki discovery berbatas sendiri, bukan klaim
 kesetaraan cakupan atau kecepatan. Keduanya referensi, bukan
 dependensi bawaan, integrasi terverifikasi atau alat yang sudah dikalahkan benchmark.
@@ -33,11 +34,11 @@ dependensi bawaan, integrasi terverifikasi atau alat yang sudah dikalahkan bench
    provenance/digest, pemeriksaan batas label serta A/AAAA/wildcard opt-in.
    Nama hasil discovery tetap kandidat, bukan target otomatis berizin; tanpa HTTP
    otomatis. Fixture memverifikasi perilaku, bukan ketersediaan provider publik.
-2. **M2C — inventaris port/layanan.** Mulai dengan TCP-connect tanpa admin ke alamat/
-   port yang diizinkan. Gunakan scope, pinning numerik, deadline, laju/concurrency/
-   budget dan cleanup bersama. Timeout bukan otomatis port open/closed. Adaptor
-   eksternal perlu review tersendiri, target numerik, argument array tetap, output/
-   waktu berbatas, tanpa shell atau skrip NSE arbitrer.
+2. **M2C — inventaris port TCP terimplementasi.** Lihat [panduan](ports.md). Host/port
+   eksplisit, validasi seluruh jawaban, koneksi numerik, budget DNS/TCP bersama dan
+   outcome open/refused/unknown yang jelas. Tanpa payload, tebakan layanan/versi,
+   raw/UDP atau adaptor alat. Identifikasi layanan tetap not_performed; metadata
+   aplikasi adalah kemampuan tahap berikut dengan bukti tersendiri.
 3. **M2D — observasi web/TLS lebih dalam.** Metadata sertifikat terverifikasi,
    pemetaan endpoint berbatas dan aturan fingerprint transparan dengan confidence.
    Petunjuk metadata bukan bukti versi rentan; tanpa eksploitasi otomatis.

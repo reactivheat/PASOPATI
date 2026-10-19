@@ -7,6 +7,8 @@ inventory, not a vulnerability scanner, crawler, subdomain enumerator or CVE mat
 No network activity occurs when running `doctor`, `init`, `config`, `scope` or `profiles`.
 M2B [subdomain discovery](discovery.md) is a separate command, offline for local
 sources by default, with explicit DNS/provider opt-ins; `scan` does not invoke it.
+M2C [TCP inventory](ports.md) is also a separate explicit command; scan never
+automatically enumerates ports, and an open TCP endpoint is not a service verdict.
 
 ## Authorization and input
 

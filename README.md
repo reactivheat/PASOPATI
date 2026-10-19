@@ -2,10 +2,11 @@
 
 [Bahasa Indonesia](README.id.md)
 
-Reconnaissance & Exposure Analysis Framework. **M2B subdomain discovery, version 0.1.0 (unreleased).**
-Explicit-source candidates, optional scoped DNS validation and authorized URL inventory.
+Reconnaissance & Exposure Analysis Framework. **M2C TCP-connect inventory, version 0.1.0 (unreleased).**
+Explicit-source candidates, scoped DNS, authorized URL and bounded TCP inventory.
 See [subdomains](docs/en/discovery.md), [recon and the local lab](docs/en/recon.md),
 and [scope](docs/en/configuration.md).
+TCP usage: [explicit ports and the local fixture](docs/en/ports.md).
 This is not a vulnerability scanner. The design favors isolated installation, small modules,
 predictable output, minimal dependencies, and evidence over unsupported findings.
 
@@ -22,6 +23,8 @@ predictable output, minimal dependencies, and evidence over unsupported findings
 - Normalized JSON/TXT output, conservative redaction and opt-in title samples.
 - `discover subdomains`: offline file/wordlist candidates, opt-in crt.sh queries,
   scoped A/AAAA validation and qualified wildcard DNS observations with provenance.
+- `ports`: explicit host/port TCP connects, all-answer scope validation, actual
+  open/refused/error evidence and shared limits; no payload or service guesses.
 - Reproducible local-only lab: `python -m pasopati.lab`; no external target required.
 - pytest, Ruff, mypy, and a Linux/Windows CI workflow for Python 3.12–3.14.
 
@@ -62,6 +65,7 @@ pasopati profiles list --json
 pasopati profiles show safe --json
 pasopati scan --help
 pasopati discover subdomains --help
+pasopati ports --help
 ```
 
 Global options go before the command. Doctor additionally accepts `--config-dir PATH`.
@@ -74,6 +78,7 @@ Read the [quick start](docs/en/quick-start.md) and [full command reference](docs
 For actual collection, follow the [local lab and scan guide](docs/en/recon.md).
 For an offline first discovery run and explicit provider consent, follow
 [the subdomain guide](docs/en/discovery.md). Discovery does not auto-probe websites.
+For TCP, follow [the port inventory guide](docs/en/ports.md); explicit port input is mandatory.
 `init` remains passive/unauthorized. Scanning requires explicit target authorization,
 safe profile and allowlisting; exit 1 includes partial/denied/skipped coverage.
 
@@ -98,6 +103,9 @@ src/pasopati/
   scoped_dns.py     scope-aware DNS and per-parent wildcard checks
   discovery_*.py    explicit source options, bounded parsing and CLI
   discovery.py      candidate/DNS/provider evidence orchestration
+  ports_cli.py      explicit TCP input and output preflight
+  port_inventory.py scoped DNS snapshot and TCP evidence collection
+  tcp.py            numeric TCP connects and conservative OS error classification
   scan_cli.py       explicit active scan command and preflight
   recon.py          normalized inventory, evidence and outcomes
   redaction.py      conservative URL/header/title reporting boundary
@@ -107,7 +115,7 @@ src/pasopati/
 ```
 
 See [configuration](docs/en/configuration.md), [transport](docs/en/transport.md),
-and [AGENTS.md](AGENTS.md). Scan schema 1 and discovery schema 2 share one JSON/TXT model.
+and [AGENTS.md](AGENTS.md). Scan schema 1, discovery 2 and TCP 3 share one JSON/TXT model.
 HTML export, vulnerability analysis and historical comparison remain future work.
 
 ## Development and tests
@@ -136,7 +144,7 @@ under [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 See the [capability roadmap and comparison criteria](docs/en/roadmap.md).
 For native Kali VirtualBox documentation, use the [manual demo guide](docs/en/kali-vm-demo.md).
 
-After M2B: explicit bounded port/service inventory (M2C).
+After M2C: deeper verified web/TLS observations (M2D).
 Later: additional discovery providers; TLS certificate inventory; service,
 web/API inventory; exposure/misconfiguration detection; CVE intelligence;
 evidence-backed findings; differential analysis; asset relationships; plugins;
@@ -151,7 +159,7 @@ Screenshots/GIFs are deferred until feature work is complete. Capture genuine ou
 
 ## Current limitations
 
-- M2B local validation: 243 tests each on Windows 11/Python 3.12.10 and Kali
+- M2C local validation: 306 tests each on Windows 11/Python 3.12.10 and Kali
   WSL2/Python 3.13.2, plus fresh-wheel entry points outside the checkout. A standalone
   Kali VM/native desktop terminal is not yet verified; hosted results are linked above.
 - On a WSL Windows mount, pytest file-descriptor capture failed before collection;
@@ -169,9 +177,12 @@ Screenshots/GIFs are deferred until feature work is complete. Capture genuine ou
   lookups, not resolver retransmission packets. See [discovery limits](docs/en/discovery.md).
 - Non-root paths/queries are withheld; titles are off by default and heuristic
   redaction cannot guarantee that opt-in titles contain no unknown sensitive data.
-- The initial scheduler is sequential and probes only the first validated IP.
-- IPv6 policy is unit tested; actual IPv6 transport is not claimed. DNS uses numeric
+- The scheduler is sequential. HTTP probes the first validated IP. TCP considers all validated
+  answers within shared limits and makes no application-level service identification.
+- IPv6 policy is unit tested. DNS uses numeric
   OS-configured servers, not hosts files/mDNS/DoH; no fallback public resolver.
+  TCP includes an IPv6 loopback integration case when the stack is available;
+  no external IPv6 transport or IPv6 HTTP claim is made.
 - The owner has not selected a license. No license grant is supplied.
 
 ## Contributing, security, and scope
@@ -183,6 +194,7 @@ or publication. Do not include credentials, local diagnostics, or sensitive scan
 Network operations require explicit target authorization and allowlisting,
 DNS/redirect scope validation, bounded rates/concurrency/timeouts/request budgets,
 and evidence provenance. No automatic exploitation or sensitive-body persistence.
-`scan` performs target HTTP; discovery DNS/provider traffic is explicitly opt-in.
+`scan` performs target HTTP; `ports` performs explicit authorized TCP connects;
+discovery DNS/provider traffic is explicitly opt-in.
 Policy commands remain offline. No external
 targets were scanned for development validation. Licensing must be resolved before distribution.

@@ -25,6 +25,9 @@
 | `scan --targets-file FILE --config FILE` | Validasi/deduplikasi batch URL berbatas |
 | `scan ... --output DIREKTORI_BARU` | Simpan JSON/TXT secara eksplisit, tidak menimpa |
 | `scan ... --include-titles` | Opt-in judul berbatas dengan penyamaran heuristik |
+| `ports HOST --ports 22,80,443 --config FILE [--json]` | TCP connect eksplisit berizin; tanpa payload/tebakan layanan |
+| `ports --targets-file FILE --ports 80,443 --config FILE` | Daftar host/IP berbatas, tanpa ekspansi URL/CIDR/rentang |
+| `ports ... --output DIREKTORI_BARU` | Model JSON/TXT bersama, schema TCP 3, tidak menimpa |
 | `discover subdomains DOMAIN --source file --candidates-file FILE` | Impor kandidat domain offline |
 | `discover subdomains DOMAIN --source wordlist --wordlist FILE` | Buat kandidat dari prefix relatif secara offline |
 | `discover subdomains DOMAIN --source crtsh --allow-provider-queries` | Query CT pihak ketiga eksplisit; wajib config safe/berizin |
@@ -93,3 +96,8 @@ otorisasi eksplisit dan scope cocok. Discovery memakai exit 0 untuk koleksi sele
 (termasuk jawaban DNS negatif/CT kosong valid), 1 untuk partial/denied/skipped/error/
 output gagal dan 2 untuk input invalid. Tidak otomatis mengunjungi situs hasil
 discovery atau mengubah allowlist.
+
+Lihat [inventaris TCP](ports.md) untuk otorisasi, snapshot DNS terpin, budget logis
+dan makna keadaan. Exit 0 berarti koleksi open/refused lengkap, bukan seluruh port
+terbuka atau target aman; unknown/partial/denied/skipped/DNS/output gagal exit 1 dan
+input/konfigurasi invalid exit 2. Identifikasi layanan tidak dilakukan.

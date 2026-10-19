@@ -1,0 +1,2 @@
+# Synthetic loopback host only. Start python -m pasopati.lab --port 8765 explicitly.
+127.0.0.1

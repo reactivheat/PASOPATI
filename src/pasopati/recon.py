@@ -113,6 +113,8 @@ class Evidence:
     subject_name: str | None = None
     query_name: str | None = None
     query_type: str | None = None
+    port: int | None = None
+    transport: str | None = None
 
 
 @dataclass(frozen=True)
@@ -156,6 +158,17 @@ class DiscoveryDetails:
 
 
 @dataclass(frozen=True)
+class TCPDetails:
+    hosts: tuple[str, ...]
+    ports: tuple[int, ...]
+    dns_queries_used: int
+    tcp_attempts: int
+    max_addresses_per_host: int
+    payloads_sent: bool = False
+    service_identification: str = "not_performed"
+
+
+@dataclass(frozen=True)
 class RunReport:
     run_id: str
     tool_version: str
@@ -166,6 +179,7 @@ class RunReport:
     include_titles: bool
     assets: tuple[Asset, ...]
     discovery: DiscoveryDetails | None = None
+    tcp: TCPDetails | None = None
 
     @property
     def ok(self) -> bool:
@@ -186,14 +200,26 @@ class RunReport:
 
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)
+        if self.tcp is None:
+            del data["tcp"]  # Preserve existing schema 1/2 shapes, including nested evidence.
+            evidence_groups = [a["evidence"] for a in data["assets"]]
+            if data["discovery"] is not None:
+                evidence_groups.append(data["discovery"]["provider_evidence"])
+                evidence_groups.extend(c["evidence"] for c in data["discovery"]["wildcard_checks"])
+            for group in evidence_groups:
+                for item in group:
+                    del item["port"], item["transport"]
         if self.discovery is None:
             del data["discovery"]  # Preserve M2A's schema-1 shape.
+        if self.discovery is None and self.tcp is None:
             for asset in data["assets"]:
                 for item in asset["evidence"]:
                     for key in ("subject_name", "query_name", "query_type"):
                         del item[key]
         return {
-            "schema_version": "2" if self.discovery is not None else "1",
+            "schema_version": "3"
+            if self.tcp is not None
+            else ("2" if self.discovery is not None else "1"),
             "report_type": "pasopati.recon",
             "tool": "PASOPATI",
             **data,
@@ -206,7 +232,9 @@ class RunReport:
             "findings": [],
             "vulnerability_assessment": "not_performed",
             "coverage": (
-                "bounded_subdomain_candidates_no_automatic_http_probing"
+                "explicit_tcp_connect_only_no_payloads_or_service_identification"
+                if self.tcp is not None
+                else "bounded_subdomain_candidates_no_automatic_http_probing"
                 if self.discovery is not None
                 else "explicit_urls_only_no_crawling_or_subdomain_discovery"
             ),

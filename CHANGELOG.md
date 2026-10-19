@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — M2C
+
+- Add explicit `ports` TCP-connect inventory with bounded host/port inputs, all-answer
+  DNS scope checks, numeric pinning and shared DNS/TCP logical budgets/deadlines.
+- Record actual open/refused/timeout/unreachable/reset/local-error evidence; never
+  infer closed/filtered from a timeout or a service from a port number. No payloads.
+- Extend the shared JSON/TXT RunReport with TCP schema 3, preserving schema 1/2 wire
+  shapes. Record connect provenance, port/transport, safe OS codes and partial coverage.
+- Add loopback TCP/DNS fixtures, IPv6 when available, cleanup/zero-payload regressions,
+  clean-wheel executable/module checks and bilingual functional guides.
+
+No raw/SYN/UDP scan, banner grabbing, service/version identification, CVE verdicts,
+package publication, tag, release or license selected. Version remains unreleased 0.1.0.
+
 ## Unreleased — M2B
 
 - Add explicit-source `discover subdomains` with offline file/wordlist candidates,

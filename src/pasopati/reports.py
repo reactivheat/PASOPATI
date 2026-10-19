@@ -14,19 +14,28 @@ def render_json(report: RunReport, language: Language = Language.EN) -> str:
 
 
 def render_text(report: RunReport, language: Language = Language.EN) -> str:
-    attempts_key = "discovery_attempts" if report.discovery is not None else "recon_requests"
+    mode = (
+        "tcp"
+        if report.tcp is not None
+        else ("discovery" if report.discovery is not None else "recon")
+    )
+    attempts_key = "recon_requests" if mode == "recon" else "discovery_attempts"
     lines = [
-        f"PASOPATI {report.tool_version} — "
-        f"{tr(language, 'discovery_title' if report.discovery is not None else 'recon_title')}",
+        f"PASOPATI {report.tool_version} — {tr(language, mode + '_title')}",
         f"{report.run_id} | {report.started_at} — {report.finished_at}",
         f"{tr(language, 'recon_status')}: {tr(language, 'scan_' + report.status)}",
         f"{tr(language, attempts_key)}: {report.requests_used}",
         tr(
             language,
-            "discovery_limitations" if report.discovery is not None else "recon_limitations",
+            mode + "_limitations",
         ),
         "",
     ]
+    if report.tcp is not None:
+        lines.append(
+            tr(language, "tcp_counts", dns=report.tcp.dns_queries_used, tcp=report.tcp.tcp_attempts)
+        )
+        lines.append("")
     if report.discovery is not None:
         details = report.discovery
         lines.append(f"{tr(language, 'discovery_domain')}: {details.domain}")
@@ -74,6 +83,8 @@ def render_text(report: RunReport, language: Language = Language.EN) -> str:
             subject = evidence.query_name or evidence.subject_name or evidence.url or ""
             lines.append(f"  {evidence.id} | {evidence.source} | {evidence.collected_at}")
             lines.append(f"    {evidence.method} {subject}")
+            if evidence.port is not None:
+                lines.append(f"    {evidence.transport}: {evidence.port}")
             if evidence.addresses:
                 lines.append("    IP: " + ", ".join(evidence.addresses))
             if evidence.redirect_destination:

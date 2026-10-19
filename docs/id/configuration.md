@@ -58,6 +58,9 @@ profil safe dan scope yang cocok; perintah kebijakan tetap offline.
 M2B [discovery](discovery.md) default kandidat lokal offline; DNS/crt.sh memerlukan
 opt-in eksplisit, otorisasi dan domain dasar dalam allowlist. Discovery berbagi
 budget safe lintas hop provider dan lookup DNS target, bukan paket jaringan.
+M2C [ports](ports.md) juga mewajibkan port numerik eksplisit dalam `scope.ports`.
+Budget 50 unit bersama mencakup lookup RR DNS serta TCP connect; IP literal perlu
+CIDR meski domain terkait diizinkan. Schema konfigurasi tetap 1.
 
 Kode keluar: 0 berhasil/cocok; 1 penolakan scope atau kegagalan I/O/operasi;
 2 argumen/konfigurasi/profil invalid. Kesalahan aplikasi JSON memiliki reason

@@ -15,16 +15,18 @@ from pasopati.discovery_cli import discover_app
 from pasopati.doctor import run_doctor
 from pasopati.i18n import Language, tr
 from pasopati.policy_cli import config_app, initialize, profiles_app, scope_app
+from pasopati.ports_cli import ports
 from pasopati.scan_cli import scan
 
 app = typer.Typer(
-    help="PASOPATI - Scoped subdomain/DNS/HTTP recon, offline policy and diagnostics.",
+    help="PASOPATI - Scoped TCP/subdomain/DNS/HTTP recon, offline policy and diagnostics.",
     add_completion=False,
     no_args_is_help=False,
     pretty_exceptions_enable=False,
 )
 app.command("init")(initialize)
 app.command("scan")(scan)
+app.command("ports")(ports)
 app.add_typer(discover_app, name="discover")
 app.add_typer(config_app, name="config")
 app.add_typer(scope_app, name="scope")

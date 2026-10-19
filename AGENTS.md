@@ -8,8 +8,10 @@ and bounded HTTP/HTTPS transport. M2A adds explicit-seed DNS/HTTP inventory thro
 `scan`, normalized provenance/observations, JSON/TXT output and a loopback lab.
 M2B adds explicit-source `discover subdomains`: local candidate/wordlist input,
 opt-in crt.sh queries and scope-checked A/AAAA/wildcard observations.
+M2C adds `ports`: explicit, bounded TCP-connect inventory; no application payloads,
+banner reads or port-number-derived service/version guesses.
 Registered commands are `doctor`, `init`, `config validate`, `scope check`,
-`profiles list/show`, `scan` and `discover subdomains`. Do not add crawling, port scanning,
+`profiles list/show`, `scan`, `discover subdomains` and `ports`. Do not add crawling,
 vulnerability checks, databases, plugins or empty engines until requested.
 Planned standalone commands: `report`, `diff`, `demo`.
 
@@ -88,6 +90,22 @@ M2A JSON shape stays schema 1; discovery uses schema 2 in the same RunReport and
 JSON/TXT renderers. DNS query_name/query_type and candidate subject_name are not URLs.
 No raw provider body, local source path, cookies, credentials or arbitrary fields
 in reports. Existing output directories are refused before provider construction.
+M2C uses the same Scope, ScopedDNS and RequestBudget; never use a socket hostname
+or a new unchecked resolver. Require safe/authorized config, explicit hosts and
+numeric ports (no CIDR/range expansion). All A/AAAA addresses must pass policy
+before any TCP attempt. Resolve once per host/run and pin that snapshot; no hidden
+refresh/retry/fallback. Probe each validated address/port within the shared budget.
+Bounds: 64 input hosts, 64 port entries, 256 deduplicated host/port pairs, at most
+16 resolved addresses per host (fail closed above the limit, never clip silently).
+Logical budget includes target DNS RR lookups and each TCP connect. Concurrency
+ceiling 2; scheduler remains sequential. TCP total deadline 10s including limiter
+waits, connect phase at most 3s. Close sockets on success/error/cancellation.
+Only actual connection success is open; explicit OS refusal is refused. Timeout,
+unreachable, reset, local errors and expired deadlines never imply closed/filtered.
+No banner/TLS/application reads/writes or getservbyport service guesses. Schema 3
+extends the common RunReport with TCP counters and evidence port/transport fields;
+preserve the exact prior schema 1/2 shapes. Denied/unattempted endpoints must not
+invent TCP evidence. Service identification remains explicitly not_performed.
 The owner's permission to develop/push is NOT authorization for arbitrary targets.
 `scan` requires authorized=true, a network-enabled profile and scope allowlisting.
 Validate the entire bounded URL batch and reserve new report output before traffic.
@@ -119,7 +137,7 @@ interpolation. Test these controls offline against local fixtures before live us
 
 ## Future report contract
 
-M2A/M2B implement the JSON/TXT inventory subset below (scan schema 1, discovery 2). Findings remain empty and
+M2A/M2B/M2C implement JSON/TXT inventory (scan schema 1, discovery 2, TCP 3). Findings remain empty and
 vulnerability_assessment is not_performed; HTML/analysis/import/diff are future work.
 
 One normalized, versioned data model must feed every renderer, including assets,

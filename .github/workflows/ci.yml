@@ -60,6 +60,7 @@ jobs:
                   discovery_output = pathlib.Path(outside) / f'discovery-{index}'
                   for args in (['--version'], ['--help'], ['doctor', '--json', '--config-dir', outside],
                                ['scan', '--help'],
+                               ['ports', '--help'],
                                ['discover', 'subdomains', '--help'],
                                ['init', '--path', policy, '--json'],
                                ['config', 'validate', '--config', policy, '--json'],
@@ -81,9 +82,10 @@ jobs:
                               assert json.loads((discovery_output / 'report.json').read_text(encoding='utf-8')) == payload
                               assert (discovery_output / 'report.txt').is_file()
               subprocess.run([str(python), '-c',
-                              'import pathlib, sys, pasopati.recon, pasopati.discovery; '
+                              'import pathlib, sys, pasopati.recon, pasopati.discovery, pasopati.port_inventory; '
                               'assert pathlib.Path(pasopati.recon.__file__).is_relative_to(sys.prefix); '
-                              'assert pathlib.Path(pasopati.discovery.__file__).is_relative_to(sys.prefix)'],
+                              'assert pathlib.Path(pasopati.discovery.__file__).is_relative_to(sys.prefix); '
+                              'assert pathlib.Path(pasopati.port_inventory.__file__).is_relative_to(sys.prefix)'],
                              cwd=outside, env=env, check=True)
               with ThreadingHTTPServer(('127.0.0.1', 0), LabHandler) as server:
                   worker = threading.Thread(target=server.serve_forever,
@@ -108,6 +110,20 @@ jobs:
                           assert json.loads((output / 'report.json').read_text(encoding='utf-8')) == payload
                           assert (output / 'report.txt').is_file()
                           assert '\x1b' not in result.stdout and 'DO_NOT_PERSIST' not in result.stdout
+                          tcp_output = pathlib.Path(outside) / f'tcp-{index}'
+                          result = subprocess.run(command + ['ports', '127.0.0.1',
+                              '--ports', str(server.server_port), '--config', str(lab_config),
+                              '--output', str(tcp_output), '--json'], cwd=outside, env=env,
+                              check=True, capture_output=True, text=True, encoding='utf-8', timeout=30)
+                          payload = json.loads(result.stdout)
+                          assert payload['ok'] is True and payload['schema_version'] == '3'
+                          assert payload['requests_used'] == 1 and payload['tcp']['tcp_attempts'] == 1
+                          assert payload['tcp']['service_identification'] == 'not_performed'
+                          assert payload['assets'][0]['evidence'][-1]['port'] == server.server_port
+                          assert any(o['kind'] == 'tcp.state' and o['value'] == 'open'
+                                     for o in payload['assets'][0]['observations'])
+                          assert json.loads((tcp_output / 'report.json').read_text(encoding='utf-8')) == payload
+                          assert (tcp_output / 'report.txt').is_file() and '\x1b' not in result.stdout
                   finally:
                       server.shutdown()
                       worker.join(timeout=3)

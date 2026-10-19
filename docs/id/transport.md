@@ -1,4 +1,4 @@
-# Transport berbatas scope (M1B, bersama M2A/M2B)
+# Transport HTTP berbatas scope (M1B, bersama M2A/M2B)
 
 [English](../en/transport.md) · [Konfigurasi](configuration.md)
 
@@ -64,6 +64,11 @@ lama. `Session(config, budget=shared)` mensyaratkan profil immutable cocok. Disc
 memakai budget yang sama untuk hop provider dan tiap lookup A/AAAA target, termasuk
 wildcard berbatas. Scope provider terpisah tidak memperluas scope target.
 Validasi DNS tidak membuat koneksi HTTP kandidat. Lihat [discovery](discovery.md).
+
+M2C [inventaris TCP](ports.md) memakai Scope, ScopedDNS, Deadline dan RequestBudget
+bersama, bukan konektor HTTP. Konektor TCP numerik tidak mengirim/membaca data
+aplikasi dan selalu menutup socket. Jangan ganti dengan `create_connection` hostname
+atau simpulkan layanan dari nomor port. Laporan HTTP/TCP memakai model ternormalisasi.
 
 ## Tes dan keterbatasan
 

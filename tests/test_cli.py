@@ -135,6 +135,7 @@ def test_installed_entry_points_outside_checkout(outside_checkout: Path, module:
         ["--help"],
         ["--version"],
         ["scan", "--help"],
+        ["ports", "--help"],
         ["discover", "subdomains", "--help"],
         ["doctor", "--json", "--config-dir", str(tmp_path / "config")],
         ["init", "--path", str(tmp_path / "policy.toml"), "--json"],

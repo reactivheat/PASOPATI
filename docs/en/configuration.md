@@ -58,6 +58,9 @@ requires authorization, the safe profile and matching scope; policy commands sta
 M2B [discovery](discovery.md) defaults to offline local candidates; DNS and crt.sh
 require explicit opt-ins, authorization and an allowlisted base domain. Discovery
 shares the safe budget across provider hops and target DNS lookups, not wire packets.
+M2C [ports](ports.md) additionally requires explicit numeric ports covered by
+`scope.ports`. The same 50-unit budget covers DNS RR lookups and TCP connects;
+literal targets need CIDRs, even when a related domain is allowed. Config schema stays 1.
 
 Exit codes: 0 success/match; 1 scope denial or I/O/operational failure; 2 invalid
 arguments/configuration/profile. Application JSON errors contain a stable reason
