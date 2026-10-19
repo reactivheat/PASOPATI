@@ -1,0 +1,4 @@
+include README.id.md AGENTS.md CHANGELOG.md
+recursive-include docs *.md
+recursive-include tests *.py
+include .github/workflows/ci.yml

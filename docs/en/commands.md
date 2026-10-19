@@ -1,0 +1,62 @@
+# Command reference
+
+[Bahasa Indonesia](../id/commands.md) · [README](../../README.md)
+
+`pasopati [GLOBAL OPTIONS] COMMAND [OPTIONS]`
+
+| Command/option | Behavior |
+| --- | --- |
+| `pasopati` | Banner, installed version, description, quick start |
+| `--help` | Available commands/options; no decorative banner |
+| `--version` | Installed distribution version from importlib.metadata; exit |
+| `--lang en` / `--lang id` | Project message language; default English |
+| `--no-banner` | Suppress branding; leave command results visible |
+| `doctor` | Offline environment readiness, ten checks |
+| `doctor --help` | Doctor options |
+| `doctor --json` | One JSON document on stdout, no banner, color or prose |
+| `doctor --config-dir PATH` | Inspect selected directory instead of platform default |
+| `python -m pasopati` | Same CLI using the interpreter where installed |
+
+Global options go before `doctor`, e.g. `pasopati --lang id --no-banner doctor`.
+This follows Typer's [command callback convention](https://typer.tiangolo.com/tutorial/commands/callback/).
+Typer-generated help and usage validation errors remain English. `--version` is
+an eager option and returns before command execution. Diagnostic messages are
+localized; command names, JSON keys, check names and statuses stay English.
+
+## Doctor contract
+
+Required: Python >=3.12, installed package metadata, a usable configuration
+directory path and filesystem write capability. Informational/optional: OS/platform,
+Git (source workflow only), pipx, Nmap, Nuclei, Subfinder. Binaries are detected using
+PATH only, never executed. Non-Linux/Windows systems receive a warning.
+No network access, package installation, config persistence or target scanning.
+
+Default configuration path is `%APPDATA%/pasopati` on Windows (fallback
+`~/AppData/Roaming/pasopati`) and `$XDG_CONFIG_HOME/pasopati` on Unix (fallback
+`~/.config/pasopati`; relative XDG paths are ignored). A missing config directory
+passes readiness when an existing ancestor is a directory and the write probe
+passes. No directory is created. A regular-file collision or permission failure
+is a required failure. A temporary write probe is cleaned up before returning.
+
+JSON fields: `schema_version` (`"1"`), `language` (`"en"` or `"id"`), `ok` (boolean),
+`checks` (ordered array). Each check includes `name`, `status` (`pass|warn|fail`),
+`required` (boolean), `details`, `recommendation` (empty if none).
+Check names: `python`, `platform`, `package`, `git`, `pipx`, `nmap`, `nuclei`,
+`subfinder`, `config_dir`, `filesystem`. JSON is an environment diagnostic, not a scan report.
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Root/help/version success, or every required doctor check passes |
+| 1 | Required doctor check fails, or requested version metadata is unavailable |
+| 2 | Invalid language, command, option, argument or other usage error |
+
+JSON is still emitted for doctor failures. Optional warnings do not cause failure.
+Do not infer that a reachable config ancestor guarantees all future writes.
+
+## Planned commands
+
+`init`, `scan`, `report`, `diff`, `demo` are not implemented or registered. Reports
+will eventually share a normalized model with TXT/JSON/HTML renderers; see
+[AGENTS.md](../../AGENTS.md). M1B will first provide scope, profiles and transport.
