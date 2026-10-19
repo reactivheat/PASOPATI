@@ -25,6 +25,7 @@
 | `scan --targets-file FILE --config FILE` | Validasi/deduplikasi batch URL berbatas |
 | `scan ... --output DIREKTORI_BARU` | Simpan JSON/TXT secara eksplisit, tidak menimpa |
 | `scan ... --include-titles` | Opt-in judul berbatas dengan penyamaran heuristik |
+| `scan ... --web-details` | Opt-in metadata TLS/header/endpoint terverifikasi, schema 4, request sama |
 | `ports HOST --ports 22,80,443 --config FILE [--json]` | TCP connect eksplisit berizin; tanpa payload/tebakan layanan |
 | `ports --targets-file FILE --ports 80,443 --config FILE` | Daftar host/IP berbatas, tanpa ekspansi URL/CIDR/rentang |
 | `ports ... --output DIREKTORI_BARU` | Model JSON/TXT bersama, schema TCP 3, tidak menimpa |
@@ -89,6 +90,8 @@ inventaris lengkap, bukan target aman. Exit 1 mencakup partial/denied/error/skip
 dan gagal output. Exit 2 berarti input/konfigurasi invalid; kesalahan aplikasi
 mendukung JSON, kesalahan parser Typer tetap teks. Laporan mencatat cakupan/bukti
 dan `vulnerability_assessment = "not_performed"`.
+M2D [detail web/TLS](web-tls.md) adalah opt-in terpisah, bukan crawling, enumerasi
+cipher atau mesin temuan. Tanpanya schema scan 1 sebelumnya tidak berubah.
 
 Lihat [discovery subdomain](discovery.md) untuk sumber, budget, privasi dan confidence
 wildcard. File/wordlist default offline/belum terverifikasi; DNS/provider memerlukan

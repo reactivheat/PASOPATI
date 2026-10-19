@@ -2,11 +2,12 @@
 
 [Bahasa Indonesia](README.id.md)
 
-Reconnaissance & Exposure Analysis Framework. **M2C TCP-connect inventory, version 0.1.0 (unreleased).**
+Reconnaissance & Exposure Analysis Framework. **M2D web/TLS observations, version 0.1.0 (unreleased).**
 Explicit-source candidates, scoped DNS, authorized URL and bounded TCP inventory.
 See [subdomains](docs/en/discovery.md), [recon and the local lab](docs/en/recon.md),
 and [scope](docs/en/configuration.md).
 TCP usage: [explicit ports and the local fixture](docs/en/ports.md).
+Web/TLS: [verified metadata and endpoint identities](docs/en/web-tls.md).
 This is not a vulnerability scanner. The design favors isolated installation, small modules,
 predictable output, minimal dependencies, and evidence over unsupported findings.
 
@@ -21,6 +22,8 @@ predictable output, minimal dependencies, and evidence over unsupported findings
   DNS/redirect validation, TLS verification, shared budgets and bounded responses.
 - `scan` for explicit URL batches, DNS/HTTP evidence and honest partial/error outcomes.
 - Normalized JSON/TXT output, conservative redaction and opt-in title samples.
+- `scan --web-details`: verified leaf/negotiation metadata, private run-local endpoint
+  identities and transparent tentative header rules; same bounded requests, no crawler.
 - `discover subdomains`: offline file/wordlist candidates, opt-in crt.sh queries,
   scoped A/AAAA validation and qualified wildcard DNS observations with provenance.
 - `ports`: explicit host/port TCP connects, all-answer scope validation, actual
@@ -64,6 +67,7 @@ pasopati scope check https://example.invalid --config pasopati.toml --json
 pasopati profiles list --json
 pasopati profiles show safe --json
 pasopati scan --help
+pasopati scan --web-details --help
 pasopati discover subdomains --help
 pasopati ports --help
 ```
@@ -106,6 +110,8 @@ src/pasopati/
   ports_cli.py      explicit TCP input and output preflight
   port_inventory.py scoped DNS snapshot and TCP evidence collection
   tcp.py            numeric TCP connects and conservative OS error classification
+  tls_metadata.py   bounded verified leaf/negotiation metadata; no raw certificate export
+  web_metadata.py   fixed-label, bounded, versioned header observations
   scan_cli.py       explicit active scan command and preflight
   recon.py          normalized inventory, evidence and outcomes
   redaction.py      conservative URL/header/title reporting boundary
@@ -115,7 +121,7 @@ src/pasopati/
 ```
 
 See [configuration](docs/en/configuration.md), [transport](docs/en/transport.md),
-and [AGENTS.md](AGENTS.md). Scan schema 1, discovery 2 and TCP 3 share one JSON/TXT model.
+and [AGENTS.md](AGENTS.md). Scan 1, discovery 2, TCP 3 and opt-in web/TLS 4 share one model.
 HTML export, vulnerability analysis and historical comparison remain future work.
 
 ## Development and tests
@@ -144,8 +150,8 @@ under [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 See the [capability roadmap and comparison criteria](docs/en/roadmap.md).
 For native Kali VirtualBox documentation, use the [manual demo guide](docs/en/kali-vm-demo.md).
 
-After M2C: deeper verified web/TLS observations (M2D).
-Later: additional discovery providers; TLS certificate inventory; service,
+After M2D: practitioner correlation, portable HTML and historical comparison (M3).
+Later: additional discovery providers; broader certificate/chain analysis; service,
 web/API inventory; exposure/misconfiguration detection; CVE intelligence;
 evidence-backed findings; differential analysis; asset relationships; plugins;
 additional reproducible labs; HTML reports.
@@ -159,7 +165,7 @@ Screenshots/GIFs are deferred until feature work is complete. Capture genuine ou
 
 ## Current limitations
 
-- M2C local validation: 306 tests each on Windows 11/Python 3.12.10 and Kali
+- M2D local validation: 347 tests each on Windows 11/Python 3.12.10 and Kali
   WSL2/Python 3.13.2, plus fresh-wheel entry points outside the checkout. A standalone
   Kali VM/native desktop terminal is not yet verified; hosted results are linked above.
 - On a WSL Windows mount, pytest file-descriptor capture failed before collection;
@@ -184,6 +190,9 @@ Screenshots/GIFs are deferred until feature work is complete. Capture genuine ou
   TCP includes an IPv6 loopback integration case when the stack is available;
   no external IPv6 transport or IPv6 HTTP claim is made.
 - The owner has not selected a license. No license grant is supplied.
+- Web/TLS metadata is opt-in and reflects one verified negotiation, not complete
+  chain/revocation/cipher auditing. Header hints are not proof of a service/version
+  or vulnerability; endpoint IDs are run-local, not historical identifiers.
 
 ## Contributing, security, and scope
 

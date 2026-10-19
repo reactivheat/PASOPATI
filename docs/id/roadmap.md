@@ -9,13 +9,13 @@ verifikasi yang dapat diulang, bukan berarti pemindaian hanya bisa offline.
 
 ## Kemampuan aktual, bukan pemasaran
 
-| Fungsi | PASOPATI M2C | Tahap berikutnya |
+| Fungsi | PASOPATI M2D | Tahap berikutnya |
 | --- | --- | --- |
 | Inventaris URL eksplisit berizin | Ada, DNS/HTTP/HTTPS berbatas | Perluas metadata secara teruji |
 | Bukti, scope, batas bersama, JSON/TXT | Ada | Korelasi dan perbandingan run |
 | Enumerasi subdomain | Kandidat file/wordlist/crt.sh eksplisit; DNS/wildcard berscope opt-in | Provider tambahan dan pengukuran cakupan terpisah |
 | Inventaris port TCP eksplisit | Ada, koneksi numerik berbatas dan outcome berkualifikasi | Metadata protokol/layanan perlu observasi terpisah |
-| Inventaris sertifikat TLS | Belum ada; verifikasi sertifikat wajib | Ekstrak metadata tervalidasi |
+| Observasi web/TLS | Leaf/negosiasi terverifikasi opt-in, identitas endpoint lokal run, aturan header berkualifikasi | Analisis lebih luas terverifikasi mandiri; bukan audit TLS lengkap |
 | Validasi kerentanan/CVE | Tidak dilakukan | Pemeriksaan berbukti dengan acceptance criteria sendiri |
 | HTML, histori/diff | Belum ada | Renderer model bersama, bukan inferensi di renderer |
 
@@ -39,9 +39,11 @@ dependensi bawaan, integrasi terverifikasi atau alat yang sudah dikalahkan bench
    outcome open/refused/unknown yang jelas. Tanpa payload, tebakan layanan/versi,
    raw/UDP atau adaptor alat. Identifikasi layanan tetap not_performed; metadata
    aplikasi adalah kemampuan tahap berikut dengan bukti tersendiri.
-3. **M2D — observasi web/TLS lebih dalam.** Metadata sertifikat terverifikasi,
-   pemetaan endpoint berbatas dan aturan fingerprint transparan dengan confidence.
-   Petunjuk metadata bukan bukti versi rentan; tanpa eksploitasi otomatis.
+3. **M2D — observasi web/TLS terimplementasi.** Lihat [panduan](web-tls.md). Fingerprint/
+   masa berlaku leaf terverifikasi, satu protokol/cipher negosiasi, jumlah SAN,
+   pemetaan endpoint privat lokal run dan aturan header berversi berbatas. Request
+   URL/redirect berscope sama, tanpa crawling/enumerasi cipher/vonis CVE. Sertifikat
+   mentah, nilai SAN, rahasia header dan kunci endpoint tidak diekspor; schema 1–3 tetap.
 4. **M3 — alur kerja praktisi.** Korelasi aset lintas sumber, HTML portabel yang
    di-escape, perbandingan historis, prioritas dan pemeriksaan paparan tervalidasi
    secara independen. Semua tampilan memakai model bukti ternormalisasi.

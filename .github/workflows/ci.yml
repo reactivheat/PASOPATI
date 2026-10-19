@@ -124,6 +124,20 @@ jobs:
                                      for o in payload['assets'][0]['observations'])
                           assert json.loads((tcp_output / 'report.json').read_text(encoding='utf-8')) == payload
                           assert (tcp_output / 'report.txt').is_file() and '\x1b' not in result.stdout
+                          web_output = pathlib.Path(outside) / f'web-{index}'
+                          result = subprocess.run(command + ['scan',
+                              f'http://127.0.0.1:{server.server_port}/', '--config', str(lab_config),
+                              '--web-details', '--output', str(web_output), '--json'],
+                              cwd=outside, env=env, check=True, capture_output=True,
+                              text=True, encoding='utf-8', timeout=30)
+                          payload = json.loads(result.stdout)
+                          assert payload['ok'] is True and payload['schema_version'] == '4'
+                          assert payload['requests_used'] == 1 and payload['web']['endpoints_observed'] == 1
+                          assert any(o['kind'] == 'web.endpoint_id' for o in payload['assets'][0]['observations'])
+                          assert not any(o['kind'] == 'tls.verified' for o in payload['assets'][0]['observations'])
+                          assert json.loads((web_output / 'report.json').read_text(encoding='utf-8')) == payload
+                          assert (web_output / 'report.txt').is_file()
+                          assert '\x1b' not in result.stdout and 'DO_NOT_PERSIST' not in result.stdout
                   finally:
                       server.shutdown()
                       worker.join(timeout=3)

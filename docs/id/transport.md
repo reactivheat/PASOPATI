@@ -87,3 +87,14 @@ koneksi dan event hop respons sebelum membaca/mengikuti redirect. Bukti parsial
 terjaga tanpa menganggap DNS membuktikan koneksi. Event mengandung data mentah
 sementara; kolektor M2A menyamarkannya sebelum output. M2A hanya menginventarisasi
 URL eksplisit; tanpa crawling atau analisis kerentanan.
+
+## Inspeksi M2D tanpa mengubah fetch normal
+
+`fetch(..., inspect_web=True, observe_tls=callback)` opt-in metadata TLS terverifikasi
+dan input header tambahan berbatas. Observer TLSHandshake terpisah mempertahankan
+bukti sebelum HTTP gagal; callback `observe` serta konektor non-inspeksi tetap
+berkontrak lama. SocketConnector default menyediakan `open_inspected`; konektor
+khusus tanpa kemampuan ini gagal eksplisit jika inspeksi HTTPS diminta. Versi HTTP
+dibaca parser aktual bila tersedia, bukan ditebak dari port. Fetch/kode error normal
+tetap; inspeksi membedakan verifikasi/TLS/metadata gagal tanpa retry insecure.
+Lihat [web/TLS](web-tls.md).

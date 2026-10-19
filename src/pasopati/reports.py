@@ -15,7 +15,9 @@ def render_json(report: RunReport, language: Language = Language.EN) -> str:
 
 def render_text(report: RunReport, language: Language = Language.EN) -> str:
     mode = (
-        "tcp"
+        "web"
+        if report.web is not None
+        else "tcp"
         if report.tcp is not None
         else ("discovery" if report.discovery is not None else "recon")
     )
@@ -31,6 +33,10 @@ def render_text(report: RunReport, language: Language = Language.EN) -> str:
         ),
         "",
     ]
+    if report.web is not None:
+        lines.append(tr(language, "web_endpoints", count=report.web.endpoints_observed))
+        lines.append(tr(language, "web_rule_set", rules=report.web.fingerprint_ruleset))
+        lines.append("")
     if report.tcp is not None:
         lines.append(
             tr(language, "tcp_counts", dns=report.tcp.dns_queries_used, tcp=report.tcp.tcp_attempts)

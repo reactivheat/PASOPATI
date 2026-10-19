@@ -10,6 +10,8 @@ M2B adds explicit-source `discover subdomains`: local candidate/wordlist input,
 opt-in crt.sh queries and scope-checked A/AAAA/wildcard observations.
 M2C adds `ports`: explicit, bounded TCP-connect inventory; no application payloads,
 banner reads or port-number-derived service/version guesses.
+M2D adds opt-in `scan --web-details`: verified leaf/negotiation metadata, private
+run-local endpoint identities and transparent tentative header-product observations.
 Registered commands are `doctor`, `init`, `config validate`, `scope check`,
 `profiles list/show`, `scan`, `discover subdomains` and `ports`. Do not add crawling,
 vulnerability checks, databases, plugins or empty engines until requested.
@@ -106,6 +108,26 @@ No banner/TLS/application reads/writes or getservbyport service guesses. Schema 
 extends the common RunReport with TCP counters and evidence port/transport fields;
 preserve the exact prior schema 1/2 shapes. Denied/unattempted endpoints must not
 invent TCP evidence. Service identification remains explicitly not_performed.
+M2D uses the same Session and requests, with no crawler, protocol/cipher enumeration,
+extra endpoint fetch, insecure TLS fallback, or new trust bypass. Inspection-capable
+connectors emit TLSHandshake only after verified metadata and phase/total deadline
+checks, before HTTP. Keep SNI/original hostname, numeric pinning, scope and cleanup.
+Legacy injected connectors remain supported normally; requested HTTPS inspection
+without the inspection capability fails explicitly, never invents verified evidence.
+TLS observations are local trust/hostname verification, verified leaf DER SHA-256,
+UTC validity, one negotiated version/cipher/symmetric bit count and SAN counts only.
+No PEM/DER, subject/issuer/serial, SAN values, session keys or exception dumps in reports.
+Metadata bounds: 64 KiB leaf DER, 4096 SAN entries; no full-chain/revocation guarantee.
+Keep successful handshake evidence when HTTP later fails; failed verification yields
+no unverified certificate fingerprint, HTTP success or automatic insecure retry.
+Only --web-details produces schema 4. Preserve schema 1/2/3 when absent. WebDetails,
+TLS evidence and header observations feed the same RunReport/JSON/TXT renderers.
+Endpoint IDs are full HMAC-SHA256 with a fresh non-exported per-run 32-byte key,
+covering canonical URLs; not unkeyed path hashes, persistent IDs or historical diff.
+Only actual responses count, including allowed redirects. Never follow HTML links.
+Header-prefix rules are versioned, fixed-label and tentative; no versions/CVEs.
+HSTS/CSP/Allow parsing is bounded and qualified, not a browser/effectiveness audit.
+Never export arbitrary header values/nonces/source URLs/cookies or execute Allow methods.
 The owner's permission to develop/push is NOT authorization for arbitrary targets.
 `scan` requires authorized=true, a network-enabled profile and scope allowlisting.
 Validate the entire bounded URL batch and reserve new report output before traffic.
@@ -137,7 +159,7 @@ interpolation. Test these controls offline against local fixtures before live us
 
 ## Future report contract
 
-M2A/M2B/M2C implement JSON/TXT inventory (scan schema 1, discovery 2, TCP 3). Findings remain empty and
+M2A-M2D implement JSON/TXT inventory (scan 1, discovery 2, TCP 3, web/TLS opt-in 4). Findings remain empty and
 vulnerability_assessment is not_performed; HTML/analysis/import/diff are future work.
 
 One normalized, versioned data model must feed every renderer, including assets,

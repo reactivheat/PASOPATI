@@ -25,6 +25,7 @@
 | `scan --targets-file FILE --config FILE` | Validate/deduplicate a bounded URL batch |
 | `scan ... --output NEW_DIRECTORY` | Explicit JSON/TXT files, never overwrite |
 | `scan ... --include-titles` | Opt into bounded, heuristically redacted titles |
+| `scan ... --web-details` | Opt into verified TLS/header/endpoint metadata, schema 4, same requests |
 | `ports HOST --ports 22,80,443 --config FILE [--json]` | Authorized, explicit TCP connects; no payloads or service guesses |
 | `ports --targets-file FILE --ports 80,443 --config FILE` | Bounded host/IP list, not URL/CIDR/range expansion |
 | `ports ... --output NEW_DIRECTORY` | Common JSON/TXT model, TCP schema 3, never overwrite |
@@ -89,6 +90,8 @@ means complete inventory, not secure targets. Exit 1 includes partial/denied/err
 skipped coverage and output failure. Exit 2 means invalid input/configuration;
 application failures support JSON, Typer parser failures remain text. Reports
 include coverage/provenance and `vulnerability_assessment = "not_performed"`.
+M2D [web/TLS details](web-tls.md) is a separate opt-in, not crawling, cipher
+enumeration or a finding engine. Without it the previous scan schema 1 is unchanged.
 
 See [subdomain discovery](discovery.md) for source selection, budgets, privacy and
 wildcard confidence. Local file/wordlist discovery defaults to offline/unverified;

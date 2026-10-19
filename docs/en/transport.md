@@ -88,3 +88,14 @@ before connecting and response-hop events before reading/following redirects.
 This preserves partial evidence without claiming a connection from DNS alone.
 Events contain transient raw data; M2A's collector sanitizes before output.
 M2A inventories explicit URLs only; no crawling or vulnerability analysis.
+
+## M2D inspection, without changing normal fetch
+
+`fetch(..., inspect_web=True, observe_tls=callback)` opts into verified TLS metadata
+and extra bounded header input. A separate TLSHandshake observer preserves provenance
+before HTTP failure; the existing `observe` callback and non-inspected connectors
+retain their contracts. Default SocketConnector supplies `open_inspected`; a custom
+connector without this capability fails explicitly on requested HTTPS inspection.
+HTTP version is read from the actual parser when available, not inferred from port.
+Normal fetch/error codes remain unchanged; inspection classifies verification/TLS/
+metadata errors separately without insecure retries. See [web/TLS](web-tls.md).

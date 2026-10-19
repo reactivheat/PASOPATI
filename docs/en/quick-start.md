@@ -53,3 +53,7 @@ queries are separate opt-ins, never automatic HTTP probing of discovered names.
 M2C [TCP inventory](ports.md) uses explicit hosts and ports, the same authorization/
 scope/limits, and numeric connects with no application payload or service guesses.
 The existing loopback lab supports a first `ports` run too.
+
+M2D [`scan --web-details`](web-tls.md) adds evidence-backed web/TLS metadata without
+additional requests or crawling. Titles are still a separate opt-in; HTTP fixtures
+produce no TLS evidence, while HTTPS must pass local trust/hostname verification.

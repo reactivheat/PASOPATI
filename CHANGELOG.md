@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — M2D
+
+- Add opt-in `scan --web-details` using the same scoped Session/requests, with verified
+  leaf DER SHA-256, UTC validity, negotiated TLS/cipher metadata and SAN counts only.
+- Preserve verified handshake provenance before HTTP; classify verification/TLS/
+  metadata failure without insecure retry or unverified fingerprints.
+- Add private per-run HMAC endpoint identities and fixed, versioned tentative
+  header product rules plus bounded HSTS/CSP/Allow summaries; no raw header export.
+- Add web/TLS schema 4 in the shared JSON/TXT RunReport, preserving schemas 1–3,
+  local HTTPS/privacy/deadline regressions and clean-wheel CLI checks.
+
+No crawling, cipher/chain/revocation audit, SAN target expansion, CVE/severity verdict,
+package publication, tag, release or license selected. Version stays unreleased 0.1.0.
+
 ## Unreleased — M2C
 
 - Add explicit `ports` TCP-connect inventory with bounded host/port inputs, all-answer

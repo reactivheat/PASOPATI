@@ -8,7 +8,7 @@ import ssl
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Protocol, cast
+from typing import Protocol, cast, runtime_checkable
 from urllib.parse import urljoin
 
 from pasopati.config import Config
@@ -21,6 +21,8 @@ from pasopati.limits import SystemClock as SystemClock
 from pasopati.profiles import Profile, get_profile
 from pasopati.scope import Scope
 from pasopati.targets import Address, Target, parse_target
+from pasopati.tls_metadata import TLSInfo, verified_metadata
+from pasopati.web_metadata import WEB_HEADERS
 
 
 class Resolver(Protocol):
@@ -38,6 +40,19 @@ class Exchange(Protocol):
 class Connector(Protocol):
     def open(
         self, target: Target, address: Address, method: str, deadline: Deadline, profile: Profile
+    ) -> Exchange: ...
+
+
+@runtime_checkable
+class InspectingConnector(Protocol):
+    def open_inspected(
+        self,
+        target: Target,
+        address: Address,
+        method: str,
+        deadline: Deadline,
+        profile: Profile,
+        on_tls: Callable[[TLSInfo], None],
     ) -> Exchange: ...
 
 
@@ -83,6 +98,10 @@ class HTTPExchange:
             raise PolicyError("invalid_response")
         return ", ".join(values) if values else None
 
+    @property
+    def http_version(self) -> int:
+        return self.response.version
+
     def read(self, size: int) -> bytes:
         return self.response.read1(size)
 
@@ -106,6 +125,28 @@ class SocketConnector:
     def open(
         self, target: Target, address: Address, method: str, deadline: Deadline, profile: Profile
     ) -> Exchange:
+        return self._open(target, address, method, deadline, profile)
+
+    def open_inspected(
+        self,
+        target: Target,
+        address: Address,
+        method: str,
+        deadline: Deadline,
+        profile: Profile,
+        on_tls: Callable[[TLSInfo], None],
+    ) -> Exchange:
+        return self._open(target, address, method, deadline, profile, on_tls)
+
+    def _open(
+        self,
+        target: Target,
+        address: Address,
+        method: str,
+        deadline: Deadline,
+        profile: Profile,
+        on_tls: Callable[[TLSInfo], None] | None = None,
+    ) -> Exchange:
         family = socket.AF_INET6 if address.version == 6 else socket.AF_INET
         connection = socket.socket(family, socket.SOCK_STREAM)
         response: http.client.HTTPResponse | None = None
@@ -125,6 +166,12 @@ class SocketConnector:
                     raise PolicyError("timeout")
                 connection.settimeout(left)
                 connection = context.wrap_socket(connection, server_hostname=target.host)
+                if on_tls is not None:
+                    info = verified_metadata(connection)
+                    if deadline.clock.monotonic() >= phase_end:
+                        raise PolicyError("timeout")
+                    deadline.remaining()
+                    on_tls(info)
             connection.settimeout(deadline.remaining(profile.read_timeout))
             request = (
                 f"{method} {target.path} HTTP/1.1\r\nHost: {target.authority}\r\n"
@@ -155,6 +202,13 @@ class Resolution:
 
 
 @dataclass(frozen=True)
+class TLSHandshake:
+    url: str
+    connected_address: str
+    info: TLSInfo
+
+
+@dataclass(frozen=True)
 class Hop:
     """Transient response provenance; callers MUST sanitize before displaying/storing."""
 
@@ -164,6 +218,7 @@ class Hop:
     status: int
     location: str | None
     headers: tuple[tuple[str, str], ...]
+    http_version: int | None = None
 
 
 OBSERVED_HEADERS = (
@@ -231,6 +286,8 @@ class Session:
         *,
         observe: Callable[[Resolution | Hop], None] | None = None,
         sample_body: bool = False,
+        inspect_web: bool = False,
+        observe_tls: Callable[[TLSHandshake], None] | None = None,
     ) -> FetchResult:
         if not self.config.authorized:
             raise PolicyError("not_authorized")
@@ -278,16 +335,33 @@ class Session:
                     )
                 exchange: Exchange | None = None
                 try:
-                    exchange = self.connector.open(
-                        current, addresses[0], method, deadline, self.profile
-                    )
+                    if inspect_web and current.scheme == "https":
+                        if not isinstance(self.connector, InspectingConnector):
+                            raise PolicyError("tls_metadata_unavailable")
+
+                        def on_tls(
+                            info: TLSInfo,
+                            *,
+                            tls_url: str = current.url,
+                            tls_address: str = str(addresses[0]),
+                        ) -> None:
+                            if observe_tls is not None:
+                                observe_tls(TLSHandshake(tls_url, tls_address, info))
+
+                        exchange = self.connector.open_inspected(
+                            current, addresses[0], method, deadline, self.profile, on_tls
+                        )
+                    else:
+                        exchange = self.connector.open(
+                            current, addresses[0], method, deadline, self.profile
+                        )
                     deadline.remaining()
                     status = exchange.status
                     redirect = status in {301, 302, 303, 307, 308}
                     location = exchange.header("Location") if redirect else None
                     headers = tuple(
                         (name.lower(), value)
-                        for name in OBSERVED_HEADERS
+                        for name in OBSERVED_HEADERS + (WEB_HEADERS if inspect_web else ())
                         if (value := exchange.header(name)) is not None
                     )
                     hop_result = Hop(
@@ -297,6 +371,7 @@ class Session:
                         status,
                         location,
                         headers,
+                        getattr(exchange, "http_version", None) if inspect_web else None,
                     )
                     hops.append(hop_result)
                     if observe is not None:
@@ -342,6 +417,12 @@ class Session:
                     )
                 except TimeoutError as exc:
                     raise PolicyError("timeout") from exc
+                except ssl.SSLCertVerificationError as exc:
+                    raise PolicyError(
+                        "tls_verification_failed" if inspect_web else "network_failed"
+                    ) from exc
+                except ssl.SSLError as exc:
+                    raise PolicyError("tls_failed" if inspect_web else "network_failed") from exc
                 except (OSError, http.client.HTTPException) as exc:
                     raise PolicyError("network_failed") from exc
                 finally:

@@ -9,6 +9,9 @@ M2B [discovery subdomain](discovery.md) adalah perintah terpisah, default offlin
 untuk sumber lokal dengan DNS/provider opt-in; `scan` tidak memanggilnya otomatis.
 M2C [inventaris TCP](ports.md) juga perintah eksplisit terpisah; scan tidak otomatis
 mengenumerasi port dan endpoint TCP open bukan vonis layanan.
+M2D [`--web-details`](web-tls.md) opt-in metadata leaf/negosiasi terverifikasi,
+identitas endpoint lokal run serta observasi header berbatas dengan request sama.
+Mode itu menggunakan schema 4; kontrak default di bawah tetap schema 1.
 
 ## Otorisasi dan input
 

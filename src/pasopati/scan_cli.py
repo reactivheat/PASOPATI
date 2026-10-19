@@ -28,6 +28,9 @@ def scan(
             "--include-titles", help="Opt in to title samples; may contain sensitive data."
         ),
     ] = False,
+    web_details: Annotated[
+        bool, typer.Option("--web-details", help="Opt in to verified TLS and bounded web metadata.")
+    ] = False,
     json_output: Annotated[
         bool, typer.Option("--json", help="One JSON document, without ANSI.")
     ] = False,
@@ -50,7 +53,7 @@ def scan(
         get_version()  # Metadata and local output errors must fail before any target traffic.
         if output is not None:
             prepare_output(output)
-        report = run_recon(loaded, urls, include_titles=include_titles)
+        report = run_recon(loaded, urls, include_titles=include_titles, inspect_web=web_details)
         if output is not None:
             write_reports(report, output, ctx.obj.language)
     except PolicyError as exc:

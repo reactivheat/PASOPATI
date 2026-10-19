@@ -52,3 +52,7 @@ merupakan opt-in terpisah, bukan HTTP otomatis ke nama hasil discovery.
 M2C [inventaris TCP](ports.md) memakai host/port eksplisit, otorisasi/scope/batas
 bersama dan koneksi numerik tanpa payload aplikasi atau tebakan layanan.
 Lab loopback yang sudah ada juga mendukung run `ports` pertama.
+
+M2D [`scan --web-details`](web-tls.md) menambah metadata web/TLS berbukti tanpa
+request tambahan atau crawling. Judul tetap opt-in terpisah; fixture HTTP tanpa bukti
+TLS, sedangkan HTTPS wajib lolos verifikasi trust/hostname lokal.

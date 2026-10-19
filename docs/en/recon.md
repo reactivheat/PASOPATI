@@ -9,6 +9,9 @@ M2B [subdomain discovery](discovery.md) is a separate command, offline for local
 sources by default, with explicit DNS/provider opt-ins; `scan` does not invoke it.
 M2C [TCP inventory](ports.md) is also a separate explicit command; scan never
 automatically enumerates ports, and an open TCP endpoint is not a service verdict.
+M2D [`--web-details`](web-tls.md) opts into verified leaf/negotiation metadata,
+run-local endpoint identities and bounded header observations using the same requests.
+That mode uses schema 4; the default contract below remains schema 1.
 
 ## Authorization and input
 

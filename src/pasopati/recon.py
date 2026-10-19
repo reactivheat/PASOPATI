@@ -1,5 +1,8 @@
 """Explicit-seed inventory only. Collection, evidence and outcomes, not vulnerability claims."""
 
+import hashlib
+import hmac
+import secrets
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
@@ -14,7 +17,8 @@ from pasopati.core.errors import PolicyError
 from pasopati.profiles import get_profile
 from pasopati.redaction import header_summary, page_title, report_url
 from pasopati.targets import parse_target
-from pasopati.transport import OBSERVED_HEADERS, Hop, Resolution, Session
+from pasopati.transport import OBSERVED_HEADERS, Hop, Resolution, Session, TLSHandshake
+from pasopati.web_metadata import RULESET, web_observations
 
 MAX_TARGETS = 256
 MAX_INPUT_BYTES = 1024 * 1024
@@ -39,6 +43,9 @@ REASONS = frozenset(
         "budget_exhausted",
         "not_authorized",
         "passive_profile",
+        "tls_verification_failed",
+        "tls_failed",
+        "tls_metadata_unavailable",
     }
 )
 Outcome = Literal["completed", "partial", "denied", "error", "skipped"]
@@ -169,6 +176,15 @@ class TCPDetails:
 
 
 @dataclass(frozen=True)
+class WebDetails:
+    endpoints_observed: int
+    endpoint_identity: str = "hmac-sha256-per-run/1"
+    fingerprint_ruleset: str = RULESET
+    tls_coverage: str = "verified_leaf_and_single_negotiation_only"
+    endpoint_mapping: str = "explicit_urls_and_allowed_redirects_no_crawl"
+
+
+@dataclass(frozen=True)
 class RunReport:
     run_id: str
     tool_version: str
@@ -180,6 +196,7 @@ class RunReport:
     assets: tuple[Asset, ...]
     discovery: DiscoveryDetails | None = None
     tcp: TCPDetails | None = None
+    web: WebDetails | None = None
 
     @property
     def ok(self) -> bool:
@@ -200,8 +217,11 @@ class RunReport:
 
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)
+        if self.web is None:
+            del data["web"]
         if self.tcp is None:
             del data["tcp"]  # Preserve existing schema 1/2 shapes, including nested evidence.
+        if self.tcp is None and self.web is None:
             evidence_groups = [a["evidence"] for a in data["assets"]]
             if data["discovery"] is not None:
                 evidence_groups.append(data["discovery"]["provider_evidence"])
@@ -211,13 +231,15 @@ class RunReport:
                     del item["port"], item["transport"]
         if self.discovery is None:
             del data["discovery"]  # Preserve M2A's schema-1 shape.
-        if self.discovery is None and self.tcp is None:
+        if self.discovery is None and self.tcp is None and self.web is None:
             for asset in data["assets"]:
                 for item in asset["evidence"]:
                     for key in ("subject_name", "query_name", "query_type"):
                         del item[key]
         return {
-            "schema_version": "3"
+            "schema_version": "4"
+            if self.web is not None
+            else "3"
             if self.tcp is not None
             else ("2" if self.discovery is not None else "1"),
             "report_type": "pasopati.recon",
@@ -232,7 +254,9 @@ class RunReport:
             "findings": [],
             "vulnerability_assessment": "not_performed",
             "coverage": (
-                "explicit_tcp_connect_only_no_payloads_or_service_identification"
+                "explicit_web_endpoints_verified_tls_no_crawl_or_vulnerability_assessment"
+                if self.web is not None
+                else "explicit_tcp_connect_only_no_payloads_or_service_identification"
                 if self.tcp is not None
                 else "bounded_subdomain_candidates_no_automatic_http_probing"
                 if self.discovery is not None
@@ -247,6 +271,7 @@ def run_recon(
     targets: Iterable[str],
     *,
     include_titles: bool = False,
+    inspect_web: bool = False,
     session: Session | None = None,
     timestamp: Callable[[], str] = utc_now,
 ) -> RunReport:
@@ -257,6 +282,8 @@ def run_recon(
     if client.config != config:
         raise PolicyError("invalid_config", 2)
     started = timestamp()
+    endpoint_key = secrets.token_bytes(32) if inspect_web else b""
+    endpoint_ids: set[str] = set()
     assets: list[Asset] = []
     for index, url in enumerate(urls, 1):
         identifier = f"asset-{index:04d}"
@@ -265,7 +292,7 @@ def run_recon(
         trace_urls: list[str] = [url]
 
         def observe(
-            event: Resolution | Hop,
+            event: Resolution | Hop | TLSHandshake,
             *,
             identifier: str = identifier,
             url: str = url,
@@ -301,6 +328,22 @@ def run_recon(
                     )
                 )
                 return
+            if isinstance(event, TLSHandshake):
+                evidence.append(
+                    replace(
+                        common,
+                        source="tls_handshake",
+                        method="TLS handshake",
+                        connected_address=event.connected_address,
+                        addresses=(event.connected_address,),
+                        port=parse_target(event.url, require_url=True).port,
+                        transport="tls",
+                    )
+                )
+                observations.append(Observation("tls.verified", True, eid))
+                for key, value in asdict(event.info).items():
+                    observations.append(Observation("tls." + key, value, eid))
+                return
             try:
                 destination = urljoin(event.url, event.location) if event.location else None
             except ValueError:
@@ -321,6 +364,20 @@ def run_recon(
             )
             observations.append(Observation("http.status", event.status, eid))
             headers = dict(event.headers)
+            if inspect_web:
+                endpoint = hmac.new(
+                    endpoint_key, event.url.encode("utf-8"), hashlib.sha256
+                ).hexdigest()
+                endpoint_ids.add(endpoint)
+                observations.append(Observation("web.endpoint_id", endpoint, eid))
+                if type(event.http_version) is int and event.http_version in {10, 11}:
+                    observations.append(
+                        Observation("http.version", f"HTTP/1.{event.http_version - 10}", eid)
+                    )
+                for item in web_observations(
+                    headers, https=parse_target(event.url, require_url=True).scheme == "https"
+                ):
+                    observations.append(Observation(item.kind, item.value, eid, item.confidence))
             for header in OBSERVED_HEADERS:
                 key = header.lower()
                 value = header_summary(key, headers[key]) if key in headers else None
@@ -336,7 +393,13 @@ def run_recon(
         state: Outcome = "completed"
         reason = "observed"
         try:
-            result = client.fetch(url, observe=observe, sample_body=True)
+            result = (
+                client.fetch(
+                    url, observe=observe, sample_body=True, inspect_web=True, observe_tls=observe
+                )
+                if inspect_web
+                else client.fetch(url, observe=observe, sample_body=True)
+            )
             if result.body_truncated:
                 state, reason = "partial", "body_sampled"
             if include_titles:
@@ -368,4 +431,5 @@ def run_recon(
         client.requests_used,
         include_titles,
         tuple(assets),
+        web=WebDetails(len(endpoint_ids)) if inspect_web else None,
     )

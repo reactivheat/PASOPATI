@@ -9,13 +9,13 @@ verification environment, not a restriction that scanning works only offline.
 
 ## Present capability, not marketing
 
-| Function | PASOPATI M2C | Next work |
+| Function | PASOPATI M2D | Next work |
 | --- | --- | --- |
 | Explicit authorized URL inventory | Implemented, bounded DNS/HTTP/HTTPS | Extend metadata carefully |
 | Evidence, scope, shared limits, JSON/TXT | Implemented | Correlation and run comparison |
 | Subdomain enumeration | Explicit file/wordlist/crt.sh candidates; opt-in scoped DNS/wildcard checks | Additional providers and separately measured coverage |
 | Explicit TCP port inventory | Implemented, bounded numeric connects and qualified outcomes | Protocol/service metadata requires separate observations |
-| TLS certificate inventory | Not implemented; certificate verification is enforced | Extract verified metadata |
+| Web/TLS observations | Opt-in verified leaf/negotiation, run-local endpoint identities, qualified header rules | Broader independently verified analysis; no complete TLS audit |
 | Vulnerability/CVE validation | Not performed | Evidence-based checks with separate acceptance criteria |
 | HTML reports, history/diff | Not implemented | Render the normalized model, never infer in renderers |
 
@@ -39,9 +39,11 @@ references, not bundled dependencies, validated integrations or defeated benchma
    qualified open/refused/unknown outcomes. No payloads, service/version guessing,
    raw/UDP probes or tool adapter. Service identification remains not_performed;
    application metadata is a later, separately evidenced capability.
-3. **M2D — deeper web/TLS observations.** Verified certificate metadata, bounded
-   endpoint mapping and transparent fingerprint rules with confidence. Metadata
-   hints are not proof of a vulnerable version; no automatic exploitation.
+3. **M2D — implemented web/TLS observations.** See [the guide](web-tls.md). Verified
+   leaf fingerprint/validity, one negotiated protocol/cipher, SAN counts, private
+   run-local endpoint mapping and bounded versioned header rules. Same scoped URL/
+   redirect requests, no crawling/cipher enumeration or CVE verdicts. Raw certificates,
+   SAN values, header secrets and endpoint keys are not exported; schemas 1–3 are preserved.
 4. **M3 — practitioner workflow.** Cross-source asset correlation, portable escaped
    HTML reports, historical comparison, prioritization and independently validated
    exposure checks. All views use the normalized evidence model.

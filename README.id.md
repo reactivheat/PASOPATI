@@ -2,11 +2,12 @@
 
 [English](README.md)
 
-Reconnaissance & Exposure Analysis Framework. **Inventaris TCP-connect M2C, versi 0.1.0 (belum dirilis).**
+Reconnaissance & Exposure Analysis Framework. **Observasi web/TLS M2D, versi 0.1.0 (belum dirilis).**
 Kandidat bersumber eksplisit, DNS berscope, inventaris URL berizin dan TCP berbatas.
 Lihat [subdomain](docs/id/discovery.md), [recon dan lab lokal](docs/id/recon.md),
 serta [scope](docs/id/configuration.md).
 Penggunaan TCP: [port eksplisit dan fixture lokal](docs/id/ports.md).
+Web/TLS: [metadata terverifikasi dan identitas endpoint](docs/id/web-tls.md).
 Ini bukan pemindai kerentanan. Desain mengutamakan instalasi terisolasi,
 modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukti.
 
@@ -21,6 +22,8 @@ modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukt
   validasi DNS/redirect, verifikasi TLS, budget bersama, serta batas respons.
 - `scan` untuk batch URL eksplisit, bukti DNS/HTTP dan outcome parsial/error yang jelas.
 - JSON/TXT dari model bersama, penyamaran konservatif dan judul halaman opt-in.
+- `scan --web-details`: metadata leaf/negosiasi terverifikasi, identitas endpoint
+  privat lokal run dan aturan header tentative; request berbatas sama, tanpa crawler.
 - `discover subdomains`: kandidat file/wordlist offline, query crt.sh opt-in,
   validasi A/AAAA berscope serta observasi wildcard DNS berkualifikasi dan berbukti.
 - `ports`: TCP connect host/port eksplisit, validasi seluruh jawaban DNS, bukti
@@ -64,6 +67,7 @@ pasopati scope check https://example.invalid --config pasopati.toml --json
 pasopati profiles list --json
 pasopati profiles show safe --json
 pasopati scan --help
+pasopati scan --web-details --help
 pasopati discover subdomains --help
 pasopati ports --help
 ```
@@ -107,6 +111,8 @@ src/pasopati/
   ports_cli.py      input TCP eksplisit dan preflight output
   port_inventory.py snapshot DNS berscope dan koleksi bukti TCP
   tcp.py            koneksi TCP numerik dan klasifikasi error OS konservatif
+  tls_metadata.py   metadata leaf/negosiasi terverifikasi berbatas, tanpa ekspor sertifikat mentah
+  web_metadata.py   observasi header berlabel tetap, berbatas dan berversi
   scan_cli.py       perintah scan aktif eksplisit dan preflight
   recon.py          inventaris ternormalisasi, bukti dan outcome
   redaction.py      batas pelaporan URL/header/judul konservatif
@@ -116,7 +122,7 @@ src/pasopati/
 ```
 
 Lihat [konfigurasi](docs/id/configuration.md), [transport](docs/id/transport.md),
-dan [AGENTS.md](AGENTS.md). Schema scan 1, discovery 2 dan TCP 3 memakai satu model JSON/TXT.
+dan [AGENTS.md](AGENTS.md). Scan 1, discovery 2, TCP 3 dan web/TLS opt-in 4 memakai satu model.
 Ekspor HTML, analisis kerentanan dan perbandingan historis masih tahap mendatang.
 
 ## Pengembangan dan pengujian
@@ -145,8 +151,8 @@ tersedia di [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 Lihat [roadmap kemampuan dan kriteria pembanding](docs/id/roadmap.md).
 Untuk dokumentasi Kali VirtualBox native, ikuti [panduan demo manual](docs/id/kali-vm-demo.md).
 
-Setelah M2C: observasi web/TLS terverifikasi lebih dalam (M2D).
-Tahap berikutnya: provider discovery tambahan; inventaris sertifikat TLS;
+Setelah M2D: korelasi praktisi, HTML portabel dan perbandingan historis (M3).
+Tahap berikutnya: provider discovery tambahan; analisis sertifikat/chain lebih luas;
 inventaris layanan, web/API; deteksi paparan/salah konfigurasi; intelijen CVE;
 temuan berbukti; analisis perbedaan; relasi aset; plugin; lab keamanan lokal yang
 reproducible tambahan; laporan HTML.
@@ -160,7 +166,7 @@ Screenshot/GIF ditunda sampai fitur selesai. Rekam keluaran nyata mengikuti
 
 ## Keterbatasan saat ini
 
-- Validasi lokal M2C: masing-masing 306 tes di Windows 11/Python 3.12.10 dan Kali
+- Validasi lokal M2D: masing-masing 347 tes di Windows 11/Python 3.12.10 dan Kali
   WSL2/Python 3.13.2, serta entry point wheel baru dari luar checkout. VM Kali
   mandiri/terminal desktop native belum diverifikasi; hasil hosted ditautkan di atas.
 - Di mount Windows WSL, capture file-descriptor pytest gagal sebelum koleksi;
@@ -185,6 +191,9 @@ Screenshot/GIF ditunda sampai fitur selesai. Rekam keluaran nyata mengikuti
   TCP mencakup tes integrasi loopback IPv6 jika stack tersedia; tanpa klaim
   transport IPv6 eksternal atau HTTP IPv6.
 - Pemilik belum memilih lisensi. Belum ada pemberian lisensi.
+- Metadata web/TLS opt-in mencerminkan satu negosiasi terverifikasi, bukan audit
+  chain/revocation/cipher lengkap. Header bukan bukti layanan/versi atau kerentanan;
+  identitas endpoint hanya lokal run, bukan identitas historis.
 
 ## Kontribusi, keamanan, dan scope
 
