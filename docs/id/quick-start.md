@@ -13,6 +13,11 @@ pasopati --lang id doctor
 pasopati --no-banner doctor
 pasopati doctor --json
 python -m pasopati --help
+pasopati init --path pasopati.toml
+pasopati config validate --config pasopati.toml --json
+pasopati scope check https://example.invalid --config pasopati.toml --json
+pasopati profiles list --json
+pasopati profiles show safe --json
 ```
 
 Perintah terakhir memerlukan interpreter tempat PASOPATI dipasang. Keluaran root
@@ -32,5 +37,8 @@ pengguna. Kegagalan wajib menghasilkan kode 1 dan rekomendasi. Untuk otomasi,
 parse JSON dan periksa `ok` serta `checks`; jalur lokal dapat sensitif, tinjau
 sebelum dibagikan. Lihat [referensi](commands.md) untuk kontrak keluaran dan kode keluar.
 
-M1A belum menerima target atau perintah pemindaian. Pemindaian mendatang memerlukan
+Belum ada perintah pemindaian. Pemindaian mendatang memerlukan
 izin eksplisit dan pembatasan scope sebelum aktivitas jaringan.
+M1B menambahkan argumen target untuk scope offline, tanpa resolve DNS atau koneksi.
+Template pasif tanpa otorisasi; kecocokan scope bukan izin menghubungi target.
+Lihat [konfigurasi](configuration.md) dan [transport internal](transport.md).

@@ -16,6 +16,11 @@
 | `doctor --json` | Satu dokumen JSON di stdout, tanpa banner, warna, atau prosa |
 | `doctor --config-dir PATH` | Periksa direktori pilihan menggantikan default platform |
 | `python -m pasopati` | CLI yang sama memakai interpreter tempat paket dipasang |
+| `init --path pasopati.toml` | Buat TOML pasif tanpa otorisasi; tidak menimpa |
+| `config validate --config pasopati.toml [--json]` | Validasi schema strict offline |
+| `scope check TARGET --config pasopati.toml [--json]` | Kecocokan scope offline, tanpa DNS/koneksi |
+| `profiles list [--json]` | Daftar kebijakan passive/safe immutable |
+| `profiles show safe [--json]` | Tampilkan kebijakan tanpa menjalankannya |
 
 Opsi global sebelum `doctor`, misalnya `pasopati --lang id --no-banner doctor`.
 Penempatan ini mengikuti [konvensi callback Typer](https://typer.tiangolo.com/tutorial/commands/callback/).
@@ -58,6 +63,10 @@ kegagalan. Induk konfigurasi yang layak bukan jaminan semua penulisan mendatang.
 
 ## Perintah direncanakan
 
-`init`, `scan`, `report`, `diff`, `demo` belum diimplementasikan atau didaftarkan.
+`scan`, `report`, `diff`, `demo` belum diimplementasikan atau didaftarkan.
 Laporan mendatang memakai model normalisasi bersama untuk TXT/JSON/HTML; lihat
-[AGENTS.md](../../AGENTS.md). M1B lebih dahulu menyediakan scope, profil, dan transport.
+[AGENTS.md](../../AGENTS.md). M1B menyediakan [konfigurasi/scope/profil](configuration.md)
+dan [transport internal](transport.md). Kode keluar kebijakan: 0 berhasil/cocok,
+1 penolakan/I/O/kegagalan operasi, 2 argumen/konfigurasi/profil invalid. Kesalahan
+aplikasi JSON tetap satu dokumen dengan reason stabil; kesalahan parser Typer tetap
+teks. Input target/konfigurasi invalid tidak dicetak mentah. `init` juga menerima `--json`.

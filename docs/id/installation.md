@@ -2,9 +2,9 @@
 
 [English](../en/installation.md) · [README](../../README.id.md)
 
-Memerlukan Python 3.12+. Ketersediaan paket PyPI dan remote GitHub yang direncanakan
-belum diverifikasi. Panduan ini memasang checkout sumber lokal. Dependensi runtime
-adalah Typer dan Rich. Git/pipx adalah alat alur kerja, sedangkan Nmap/Nuclei/Subfinder
+Memerlukan Python 3.12+. Sumber tersedia di https://github.com/reactivheat/PASOPATI;
+nama paket belum diterbitkan/dipesan di PyPI. Pasang checkout sumber. Dependensi
+runtime adalah Typer, Rich dan dnspython. Git/pipx alat alur kerja; Nmap/Nuclei/Subfinder
 merupakan integrasi mendatang yang opsional.
 
 ## Kali Linux: instalasi pengguna terisolasi
@@ -19,12 +19,11 @@ sudo apt install -y git pipx python3 python3-venv
 python3 --version  # Wajib 3.12 atau lebih baru; berhenti jika belum sesuai.
 ```
 
-Salin proyek ke VM lalu masuk ke root proyek yang berisi pyproject.toml.
-Hanya setelah pemilik menerbitkan remote, alur pengambilan berikut berlaku:
+Gunakan checkout yang ada, atau clone dari direktori induk (bukan di dalam PASOPATI):
 
 ```bash
-git clone https://github.com/reactivheat/pasopati-recon.git
-cd pasopati-recon
+git clone https://github.com/reactivheat/PASOPATI.git
+cd PASOPATI
 ```
 
 Pasang dari root proyek:
@@ -115,7 +114,7 @@ capture stream Python:
 .venv/bin/python -m pytest -v --capture=sys --basetemp=.local/pytest
 ```
 
-Validasi Kali lokal memakai opsi ini dan meluluskan 35 tes. Ini keterbatasan
+Validasi Kali lokal memakai opsi ini dan meluluskan seluruh suite. Ini keterbatasan
 runner/mount; verifikasi VM native sebaiknya juga mencoba perintah normal di atas.
 Tidak perlu mengubah execution policy host, Python sistem, atau perlindungan
 package manager.

@@ -3,8 +3,8 @@
 ## Scope and implementation status
 
 M1A implements packaging, CLI presentation, EN/ID messages, and offline local
-environment diagnostics. M1B adds strict TOML, scope checks and built-in profiles;
-its internal HTTP transport is being validated. Registered commands are `doctor`,
+environment diagnostics. M1B adds strict TOML, scope checks, built-in profiles,
+and an internal bounded HTTP/HTTPS transport. Registered commands are `doctor`,
 `init`, `config validate`, `scope check`, and `profiles list/show`. Do not add
 scanners, crawling, databases, plugins, or empty engines until their milestone is
 explicitly requested. Planned commands: `scan`, `report`, `diff`, `demo`.
@@ -54,10 +54,22 @@ in tracked files. Run subprocess entry-point tests from outside the checkout.
 
 ## Future architecture (documented contracts, not implemented)
 
-M1B introduces scope configuration, explicit scan profiles, and scope-aware
-transport. Future discovery/analysis modules must depend on those shared controls,
+M1B implements scope configuration, explicit profiles, and scope-aware transport.
+M2 discovery/analysis modules must depend on those shared controls,
 not construct bypass network clients. Keep collection, evidence, analysis, and
 rendering separate. Introduce abstractions only when real callers need them.
+
+Current transport invariants are documented in docs/en/transport.md and docs/id/transport.md.
+All target DNS addresses must pass policy before numeric socket.connect; do not replace
+this with a check followed by a client that resolves again. dnspython is required for
+bounded DNS lifetime; do not use blocking getaddrinfo with a post-hoc timeout check.
+Keep TLS verification/original SNI, immutable passive/safe profiles and shared per-session
+rate/concurrency/request budgets. No proxy, auth, cookie, TLS key log or body persistence.
+All CLI policy commands stay offline; transport is internal until explicitly exposed.
+Keep ordinary tests offline; integration fixtures may use guarded numeric loopback
+only. Generate test TLS credentials in temporary directories; never commit keys.
+pytest_configure creates basetemp's parent for fresh checkouts. Installed executable
+lookup must use sysconfig's scripts path, not assume it is next to sys.executable.
 
 Before any target network traffic, require explicit authorization and target
 allowlisting. Validate DNS answers and every redirect against scope, including

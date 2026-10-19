@@ -2,9 +2,9 @@
 
 [Bahasa Indonesia](../id/installation.md) · [README](../../README.md)
 
-Requires Python 3.12+. Package availability on PyPI and the proposed GitHub remote
-have not been verified. These instructions install the local source checkout.
-Runtime dependencies are Typer and Rich; Git/pipx are workflow tools, while
+Requires Python 3.12+. Source is available at https://github.com/reactivheat/PASOPATI;
+the package is not published/reserved on PyPI. Install the source checkout.
+Runtime dependencies are Typer, Rich and dnspython; Git/pipx are workflow tools, while
 Nmap/Nuclei/Subfinder are optional future integrations.
 
 ## Kali Linux: isolated user installation
@@ -20,12 +20,11 @@ sudo apt install -y git pipx python3 python3-venv
 python3 --version  # Must be 3.12 or newer; stop here otherwise.
 ```
 
-Copy the project into the VM and enter its root (containing pyproject.toml).
-Only after the owner publishes the proposed remote, this acquisition workflow applies:
+Use an existing checkout, or clone from a parent directory (not inside PASOPATI):
 
 ```bash
-git clone https://github.com/reactivheat/pasopati-recon.git
-cd pasopati-recon
+git clone https://github.com/reactivheat/PASOPATI.git
+cd PASOPATI
 ```
 
 Install from the project root:
@@ -116,7 +115,7 @@ workaround keeps the same test suite and assertions, capturing Python streams:
 .venv/bin/python -m pytest -v --capture=sys --basetemp=.local/pytest
 ```
 
-The local Kali validation used this option and passed all 35 tests. This is a
+The local Kali validation used this option and passed the complete suite. This is a
 test-runner/mount limitation; native VM verification should also try the normal
 command above. No host execution policy, system Python, or package-manager
 protection needs to be changed.

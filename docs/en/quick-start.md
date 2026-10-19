@@ -13,6 +13,11 @@ pasopati --lang id doctor
 pasopati --no-banner doctor
 pasopati doctor --json
 python -m pasopati --help
+pasopati init --path pasopati.toml
+pasopati config validate --config pasopati.toml --json
+pasopati scope check https://example.invalid --config pasopati.toml --json
+pasopati profiles list --json
+pasopati profiles show safe --json
 ```
 
 The final command needs the interpreter where PASOPATI was installed. Root output
@@ -32,5 +37,8 @@ Required failures return 1 and include recommendations. For automation, parse JS
 and inspect `ok` plus `checks`; local paths may be sensitive, so review before sharing.
 See [commands](commands.md) for the output contract and exit-code semantics.
 
-There are no target arguments or scanning commands in M1A. Future scanning must
-be explicitly authorized and bounded by scope before any network activity.
+There are no scanning commands. Future scanning must be explicitly authorized
+and bounded by scope before any network activity. Scope target arguments
+never resolve DNS or connect. The
+template is passive and unauthorized. A match is not permission to connect.
+See [configuration](configuration.md) and [internal transport](transport.md).

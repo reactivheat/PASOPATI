@@ -2,8 +2,8 @@
 
 [English](README.md)
 
-Reconnaissance & Exposure Analysis Framework. **M1A: fondasi CLI, versi 0.1.0.**
-Perintah kebijakan M1B tersedia; transport internal sedang divalidasi.
+Reconnaissance & Exposure Analysis Framework. **Fondasi M1B, versi 0.1.0 (belum dirilis).**
+Konfigurasi strict, keputusan scope offline, profil, dan transport internal berbatas.
 Lihat [konfigurasi dan scope](docs/id/configuration.md). Pemindaian target dan
 deteksi kerentanan belum tersedia. Desain mengutamakan instalasi terisolasi,
 modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukti.
@@ -14,6 +14,9 @@ modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukt
 - Banner ASCII bermotif panah, tampilan ringkas untuk terminal sempit, dan Rich.
 - Pesan Bahasa Inggris/Indonesia melalui `--lang en|id`.
 - `doctor` offline, JSON terstruktur, dan kode keluar yang jelas.
+- TOML strict, `init` tanpa overwrite, dan pemeriksaan scope offline.
+- Profil passive/safe immutable dan API internal HTTP/HTTPS dengan IP pinning,
+  validasi DNS/redirect, verifikasi TLS, budget bersama, serta batas respons.
 - pytest, Ruff, mypy, serta konfigurasi CI Linux/Windows untuk Python 3.12–3.14.
 
 ## Instalasi
@@ -29,11 +32,10 @@ pasopati --version
 pasopati doctor
 ```
 
-Repositori yang direncanakan: `https://github.com/reactivheat/pasopati-recon`;
-ketersediaannya belum diverifikasi. Nama distribusi `pasopati-recon` belum
-dipesan atau diterbitkan. Gunakan checkout lokal sampai publikasi tersedia.
-Lihat [panduan instalasi](docs/id/installation.md) untuk prasyarat Kali, alur clone
-bersyarat, pengaturan Windows, dan checklist verifikasi Kali.
+Sumber: [reactivheat/PASOPATI](https://github.com/reactivheat/PASOPATI).
+Nama distribusi `pasopati-recon` belum dipesan atau diterbitkan di PyPI.
+Lihat [panduan instalasi](docs/id/installation.md) untuk prasyarat Kali, alur clone,
+pengaturan Windows, dan checklist verifikasi Kali.
 Jangan memasang proyek ke lingkungan Python yang dikelola sistem operasi.
 
 ## Penggunaan dan referensi CLI
@@ -47,6 +49,11 @@ pasopati doctor --json
 pasopati --lang id doctor
 pasopati --no-banner doctor
 python -m pasopati --help
+pasopati init --path pasopati.toml
+pasopati config validate --config pasopati.toml --json
+pasopati scope check https://example.invalid --config pasopati.toml --json
+pasopati profiles list --json
+pasopati profiles show safe --json
 ```
 
 Opsi global ditempatkan sebelum perintah. Doctor juga menerima `--config-dir PATH`.
@@ -54,6 +61,8 @@ Kode keluar: `0` berhasil/pemeriksaan wajib lulus, `1` pemeriksaan wajib atau
 instalasi gagal, `2` penggunaan CLI tidak valid. Alat opsional yang tidak tersedia
 tidak membuat instalasi gagal. JSON memakai identifier Inggris yang stabil dan
 pesan terlokalisasi; tidak ada banner atau ANSI.
+Perintah kebijakan memakai 0 untuk berhasil/cocok, 1 untuk penolakan atau kegagalan
+I/O/operasi, 2 untuk argumen/konfigurasi/profil invalid. Scope check tanpa DNS/koneksi.
 Baca [panduan singkat](docs/id/quick-start.md) dan [referensi lengkap](docs/id/commands.md).
 
 ## Arsitektur
@@ -66,11 +75,18 @@ src/pasopati/
   branding.py       banner ASCII responsif
   i18n.py           katalog pesan EN/ID
   doctor.py         pemeriksaan offline dan hasil terstruktur
+  config.py         TOML strict dan pembuatan template eksklusif
+  targets.py        normalisasi target/domain bersama
+  scope.py          kebijakan offline dan alamat hasil DNS
+  profiles.py       batas profil bawaan immutable
+  policy_cli.py     CLI konfigurasi/scope/profil offline
+  transport.py      HTTP/HTTPS pinned, lifetime DNS, batas sumber daya
   core/errors.py    kesalahan instalasi dan kode keluar
 ```
 
-[AGENTS.md](AGENTS.md) mencatat batas scope/transport dan kontrak laporan
-TXT/JSON/HTML mendatang. Komponen tersebut belum diimplementasikan.
+Lihat [konfigurasi](docs/id/configuration.md), [transport](docs/id/transport.md),
+dan [AGENTS.md](AGENTS.md). Kontrak normalisasi laporan TXT/JSON/HTML untuk milestone
+berikutnya sudah dicatat; exporter laporan belum diimplementasikan.
 
 ## Pengembangan dan pengujian
 
@@ -87,18 +103,20 @@ py -3.12 -m venv .venv
 ```
 
 Di Linux/macOS, buat environment dengan `python3 -m venv .venv`, lalu ganti
-interpreter Windows di atas dengan `.venv/bin/python`. Tes tidak membutuhkan
-internet atau binary pemindai. Unduhan dependensi instalasi/build dapat memerlukan
-internet. CI sudah dikonfigurasi; hasil CI hosted hanya boleh diklaim setelah dijalankan.
+interpreter Windows di atas dengan `.venv/bin/python`. Tes tanpa jaringan eksternal
+atau binary pemindai. Integrasi memakai socket loopback terbatas; tes TLS nyata
+membuat sertifikat sementara melalui OpenSSL (skip eksplisit jika tidak tersedia).
+Unduhan dependensi instalasi/build dapat memerlukan internet. Hasil hosted aktual
+tersedia di [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 
 ## Fitur direncanakan
 
-M1B: konfigurasi scope, profil pemindaian, dan transport yang mematuhi scope.
+M2: modul discovery yang memakai transport M1B dan kontrak bukti.
 Tahap berikutnya: discovery pasif; DNS/subdomain; HTTP, TLS, security header;
 inventaris layanan, web/API; deteksi paparan/salah konfigurasi; intelijen CVE;
 temuan berbukti; analisis perbedaan; relasi aset; plugin; lab keamanan lokal yang
 reproducible; laporan TXT/JSON/HTML.
-`init`, `scan`, `report`, `diff`, dan `demo` masih rencana, belum terdaftar di CLI.
+`scan`, `report`, `diff`, dan `demo` masih rencana, belum terdaftar di CLI.
 
 ## Screenshot dan demo
 
@@ -109,7 +127,7 @@ Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
 ## Keterbatasan saat ini
 
 - Divalidasi di Windows 11/Python 3.12.10 dan Kali WSL2/Python 3.13.2. VM Kali
-  mandiri/terminal desktop native dan CI hosted belum diverifikasi.
+  mandiri/terminal desktop native belum diverifikasi; hasil hosted ditautkan di atas.
 - Di mount Windows WSL, capture file-descriptor pytest gagal sebelum koleksi;
   `--capture=sys` berhasil menjalankan seluruh tes. Lihat checklist instalasi.
 - Bantuan dan kesalahan penggunaan dari Typer masih Inggris; pesan proyek mendukung EN/ID.
@@ -117,7 +135,10 @@ Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
 - Doctor menulis/menghapus berkas uji sementara di direktori konfigurasi atau induk
   terdekat yang tersedia. Tidak membuat konfigurasi permanen. Hasil bukan jaminan
   izin atau ruang penyimpanan tidak akan berubah.
-- Pemindaian, engine pembatasan scope, penyimpanan, dan ekspor laporan belum tersedia.
+- Pipeline pemindaian, penyimpanan, dan ekspor laporan belum tersedia. Transport
+  adalah API Python internal; perintah CLI kebijakan tetap offline.
+- Policy IPv6 diuji; transport IPv6 nyata belum diklaim. DNS memakai server numerik
+  OS, bukan hosts file/mDNS/DoH; tanpa fallback resolver publik.
 - Pemilik belum memilih lisensi. Belum ada pemberian lisensi.
 
 ## Kontribusi, keamanan, dan scope
@@ -125,8 +146,8 @@ Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
 Baca [AGENTS.md](AGENTS.md), gunakan environment terisolasi, tambahkan tes offline
 yang bermakna, jalankan pemeriksaan, dan perbarui kedua bahasa. Tinjau perubahan
 sebelum commit/publikasi. Jangan sertakan kredensial, diagnostik lokal, atau data
-pemindaian sensitif. Operasi jaringan mendatang wajib memiliki izin target dan
+pemindaian sensitif. Operasi jaringan wajib memiliki izin target dan
 allowlist, validasi DNS/redirect, batas laju/concurrency/timeout/anggaran request,
 serta asal-usul bukti. Tidak boleh ada eksploitasi otomatis atau penyimpanan
-otomatis body sensitif. M1A tidak melakukan reconnaissance jaringan.
+otomatis body sensitif. CLI tidak melakukan reconnaissance jaringan.
 Keputusan lisensi perlu diselesaikan sebelum distribusi.

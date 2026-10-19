@@ -16,6 +16,11 @@
 | `doctor --json` | One JSON document on stdout, no banner, color or prose |
 | `doctor --config-dir PATH` | Inspect selected directory instead of platform default |
 | `python -m pasopati` | Same CLI using the interpreter where installed |
+| `init --path pasopati.toml` | Create passive unauthorized TOML; never overwrite |
+| `config validate --config pasopati.toml [--json]` | Strict offline schema validation |
+| `scope check TARGET --config pasopati.toml [--json]` | Offline scope match; no DNS/connectivity |
+| `profiles list [--json]` | List immutable passive/safe policies |
+| `profiles show safe [--json]` | Show a policy; does not execute it |
 
 Global options go before `doctor`, e.g. `pasopati --lang id --no-banner doctor`.
 This follows Typer's [command callback convention](https://typer.tiangolo.com/tutorial/commands/callback/).
@@ -57,6 +62,11 @@ Do not infer that a reachable config ancestor guarantees all future writes.
 
 ## Planned commands
 
-`init`, `scan`, `report`, `diff`, `demo` are not implemented or registered. Reports
+`scan`, `report`, `diff`, `demo` are not implemented or registered. Reports
 will eventually share a normalized model with TXT/JSON/HTML renderers; see
-[AGENTS.md](../../AGENTS.md). M1B will first provide scope, profiles and transport.
+[AGENTS.md](../../AGENTS.md). M1B [configuration/scope/profiles](configuration.md)
+and [internal transport](transport.md) are available. Policy commands use exit 0
+for success/match, 1 for denial/I/O/operational failure, 2 for invalid arguments,
+configuration or profile. Application JSON errors preserve one document with stable
+reason codes; Typer parser errors remain text. Invalid targets/config errors are
+never echoed verbatim. `init` also accepts `--json`.
