@@ -10,6 +10,7 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import pytest
+from rich.text import Text
 from typer.testing import CliRunner
 
 import pasopati
@@ -45,11 +46,12 @@ def test_root_and_banner_suppression() -> None:
 
 @pytest.mark.parametrize("args", [["--help"], ["doctor", "--help"]])
 def test_help(args: list[str]) -> None:
-    result = runner.invoke(app, args)
+    result = runner.invoke(app, args, env={"FORCE_COLOR": "1"})
     assert result.exit_code == 0
-    assert "doctor" in result.output
-    assert "--help" in result.output
-    assert "--> PASOPATI" not in result.output
+    visible = Text.from_ansi(result.output).plain
+    assert "doctor" in visible
+    assert "--help" in visible
+    assert "--> PASOPATI" not in visible
 
 
 def test_version_matches_metadata() -> None:

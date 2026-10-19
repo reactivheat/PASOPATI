@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m pip install -e ".[dev]"
+      - run: python -m pip check
       - run: python -m pytest -v --basetemp=.local/pytest
       - run: python -m ruff check .
       - run: python -m ruff format --check .
@@ -47,8 +48,13 @@ jobs:
           with tempfile.TemporaryDirectory() as outside:
               env = dict(os.environ)
               env.pop('PYTHONPATH', None)
-              for command in ([str(cli)], [str(python), '-m', 'pasopati']):
-                  for args in (['--version'], ['--help'], ['doctor', '--json', '--config-dir', outside]):
+              for index, command in enumerate(([str(cli)], [str(python), '-m', 'pasopati'])):
+                  policy = str(pathlib.Path(outside) / f'policy-{index}.toml')
+                  for args in (['--version'], ['--help'], ['doctor', '--json', '--config-dir', outside],
+                               ['init', '--path', policy, '--json'],
+                               ['config', 'validate', '--config', policy, '--json'],
+                               ['scope', 'check', 'example.invalid', '--config', policy, '--json'],
+                               ['profiles', 'list', '--json'], ['profiles', 'show', 'safe', '--json']):
                       result = subprocess.run(command + args, cwd=outside, env=env, check=True,
                                               capture_output=True, text=True, encoding='utf-8', timeout=30)
                       assert not result.stderr, result.stderr
