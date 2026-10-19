@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased — M2A
+
+- Add authorized, explicit-seed `scan` with bounded UTF-8 batch input and deduplication.
+- Retain actual DNS/literal and HTTP-hop provenance, partial failures, shared request
+  budgets and honest completed/partial/denied/error/skipped inventory outcomes.
+- Add bounded body sampling for inventory while retaining the strict default API;
+  handle malformed redirects without leaking raw input or bypassing scope.
+- Add one versioned inventory model for JSON/TXT, explicit exclusive output, conservative
+  URL/header redaction and opt-in, bounded, heuristically redacted title samples.
+- Add local-only HTTP lab, synthetic configuration/targets, end-to-end tests and
+  bilingual inventory documentation. No external-target scan used for validation.
+
+No crawling, subdomain discovery, vulnerability/CVE claims, HTML report, package
+publication, tag, release or license selected. Version remains unreleased 0.1.0.
+
 ## Unreleased — M1B
 
 - Add strict bounded TOML, exclusive template initialization, immutable profiles,

@@ -1,0 +1,12 @@
+# Authorization applies ONLY to this synthetic loopback lab. Not a real-target template.
+schema_version = 1
+profile = "safe"
+authorized = true
+
+[scope]
+allow_domains = []
+allow_cidrs = ["127.0.0.1/32"]
+exclude_domains = []
+exclude_cidrs = []
+ports = [8765]
+allow_private = true

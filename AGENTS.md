@@ -4,10 +4,12 @@
 
 M1A implements packaging, CLI presentation, EN/ID messages, and offline local
 environment diagnostics. M1B adds strict TOML, scope checks, built-in profiles,
-and an internal bounded HTTP/HTTPS transport. Registered commands are `doctor`,
-`init`, `config validate`, `scope check`, and `profiles list/show`. Do not add
-scanners, crawling, databases, plugins, or empty engines until their milestone is
-explicitly requested. Planned commands: `scan`, `report`, `diff`, `demo`.
+and bounded HTTP/HTTPS transport. M2A adds explicit-seed DNS/HTTP inventory through
+`scan`, normalized provenance/observations, JSON/TXT output and a loopback lab.
+Registered commands are `doctor`, `init`, `config validate`, `scope check`,
+`profiles list/show` and `scan`. Do not add crawling, subdomain enumeration,
+vulnerability checks, databases, plugins or empty engines until requested.
+Planned standalone commands: `report`, `diff`, `demo`.
 
 Use Python 3.12+, a `src/` layout, Typer and Rich, standard-library facilities,
 type annotations, explicit errors, and small testable components. Keep packaging
@@ -55,7 +57,7 @@ in tracked files. Run subprocess entry-point tests from outside the checkout.
 ## Future architecture (documented contracts, not implemented)
 
 M1B implements scope configuration, explicit profiles, and scope-aware transport.
-M2 discovery/analysis modules must depend on those shared controls,
+M2A collection and future discovery/analysis modules depend on those shared controls,
 not construct bypass network clients. Keep collection, evidence, analysis, and
 rendering separate. Introduce abstractions only when real callers need them.
 
@@ -65,7 +67,19 @@ this with a check followed by a client that resolves again. dnspython is require
 bounded DNS lifetime; do not use blocking getaddrinfo with a post-hoc timeout check.
 Keep TLS verification/original SNI, immutable passive/safe profiles and shared per-session
 rate/concurrency/request budgets. No proxy, auth, cookie, TLS key log or body persistence.
-All CLI policy commands stay offline; transport is internal until explicitly exposed.
+All CLI policy commands stay offline; only explicit `scan` performs target traffic.
+The owner's permission to develop/push is NOT authorization for arbitrary targets.
+`scan` requires authorized=true, a network-enabled profile and scope allowlisting.
+Validate the entire bounded URL batch and reserve new report output before traffic.
+Keep one Session per run; never reset budgets per target or add hidden retries.
+Use transport resolution/response events for provenance, including partial results.
+Never claim a DNS answer means a TCP connection succeeded. Literal IPs are not DNS results.
+Default reports withhold every non-root URL path/query and raw header values.
+Titles are opt-in, heuristically redacted, and never guaranteed secret-free.
+No body/cookie/header dump, CVE inference, severity assignment or "secure" verdict.
+JSON and TXT use the same versioned RunReport; files require explicit --output,
+exclusive creation and no overwrites. A partial/denied/skipped/error result exits 1.
+`python -m pasopati.lab` is an explicit local-only HTTP fixture, never auto-started.
 Keep ordinary tests offline; integration fixtures may use guarded numeric loopback
 only. Generate test TLS credentials in temporary directories; never commit keys.
 pytest_configure creates basetemp's parent for fresh checkouts. Installed executable

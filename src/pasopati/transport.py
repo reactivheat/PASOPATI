@@ -7,7 +7,7 @@ import socket
 import ssl
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Protocol, cast
@@ -132,9 +132,9 @@ class HTTPExchange:
 
     def header(self, name: str) -> str | None:
         values = self.response.headers.get_all(name, [])
-        if len(values) > 1:
+        if len(values) > 1 and name.lower() in {"location", "content-type", "content-encoding"}:
             raise PolicyError("invalid_response")
-        return values[0] if values else None
+        return ", ".join(values) if values else None
 
     def read(self, size: int) -> bytes:
         return self.response.read1(size)
@@ -199,10 +199,46 @@ class SocketConnector:
 
 
 @dataclass(frozen=True)
+class Resolution:
+    """All returned addresses passed policy; no connection is implied yet."""
+
+    url: str
+    addresses: tuple[str, ...]
+    dns_performed: bool
+
+
+@dataclass(frozen=True)
+class Hop:
+    """Transient response provenance; callers MUST sanitize before displaying/storing."""
+
+    url: str
+    resolved_addresses: tuple[str, ...]
+    connected_address: str
+    status: int
+    location: str | None
+    headers: tuple[tuple[str, str], ...]
+
+
+OBSERVED_HEADERS = (
+    "Content-Type",
+    "Server",
+    "X-Powered-By",
+    "Strict-Transport-Security",
+    "Content-Security-Policy",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Referrer-Policy",
+    "Permissions-Policy",
+)
+
+
+@dataclass(frozen=True)
 class FetchResult:
     status: int
     body: bytes
     content_type: str | None
+    hops: tuple[Hop, ...] = ()
+    body_truncated: bool = False
 
 
 class Session:
@@ -259,7 +295,14 @@ class Session:
         finally:
             self._lock.release()
 
-    def fetch(self, url: str, method: str = "GET") -> FetchResult:
+    def fetch(
+        self,
+        url: str,
+        method: str = "GET",
+        *,
+        observe: Callable[[Resolution | Hop], None] | None = None,
+        sample_body: bool = False,
+    ) -> FetchResult:
         if not self.config.authorized:
             raise PolicyError("not_authorized")
         if not self.profile.network_enabled:
@@ -269,6 +312,7 @@ class Session:
         deadline = Deadline(self.clock.monotonic() + self.profile.total_timeout, self.clock)
         current = parse_target(url, require_url=True)
         seen: set[str] = set()
+        hops: list[Hop] = []
         with self.slot(deadline):
             for hop in range(self.profile.max_redirects + 1):
                 decision = self.scope.target(current)
@@ -279,9 +323,11 @@ class Session:
                 seen.add(current.url)
                 self._reserve(deadline)
                 addresses: tuple[Address, ...]
+                dns_performed = False
                 try:
                     addresses = (ipaddress.ip_address(current.host),)
                 except ValueError:
+                    dns_performed = True
                     try:
                         addresses = self.resolver.resolve(
                             current.host, deadline.remaining(self.profile.connect_timeout)
@@ -297,19 +343,46 @@ class Session:
                     decision = self.scope.address(address)
                     if not decision.allowed:
                         raise PolicyError(decision.reason)
+                if observe is not None:
+                    observe(
+                        Resolution(current.url, tuple(str(a) for a in addresses), dns_performed)
+                    )
                 exchange: Exchange | None = None
                 try:
                     exchange = self.connector.open(
                         current, addresses[0], method, deadline, self.profile
                     )
                     deadline.remaining()
-                    if exchange.status in {301, 302, 303, 307, 308}:
-                        location = exchange.header("Location")
+                    status = exchange.status
+                    redirect = status in {301, 302, 303, 307, 308}
+                    location = exchange.header("Location") if redirect else None
+                    headers = tuple(
+                        (name.lower(), value)
+                        for name in OBSERVED_HEADERS
+                        if (value := exchange.header(name)) is not None
+                    )
+                    hop_result = Hop(
+                        current.url,
+                        tuple(str(a) for a in addresses),
+                        str(addresses[0]),
+                        status,
+                        location,
+                        headers,
+                    )
+                    hops.append(hop_result)
+                    if observe is not None:
+                        observe(hop_result)
+                    if redirect:
                         if not location:
                             raise PolicyError("invalid_response")
                         if hop == self.profile.max_redirects:
                             raise PolicyError("redirect_limit")
-                        destination = parse_target(urljoin(current.url, location), require_url=True)
+                        try:
+                            destination = parse_target(
+                                urljoin(current.url, location), require_url=True
+                            )
+                        except ValueError as exc:
+                            raise PolicyError("invalid_target", 2) from exc
                         if current.scheme == "https" and destination.scheme != "https":
                             raise PolicyError("https_downgrade")
                         current = destination
@@ -318,6 +391,7 @@ class Session:
                     if encoding and encoding.strip().lower() != "identity":
                         raise PolicyError("encoding_denied")
                     body = bytearray()
+                    truncated = False
                     if method != "HEAD":
                         while True:
                             deadline.remaining()
@@ -329,9 +403,13 @@ class Session:
                                 break
                             body.extend(chunk)
                             if len(body) > self.profile.max_body_bytes:
-                                raise PolicyError("body_too_large")
+                                if not sample_body:
+                                    raise PolicyError("body_too_large")
+                                del body[self.profile.max_body_bytes :]
+                                truncated = True
+                                break
                     return FetchResult(
-                        exchange.status, bytes(body), exchange.header("Content-Type")
+                        status, bytes(body), exchange.header("Content-Type"), tuple(hops), truncated
                     )
                 except TimeoutError as exc:
                     raise PolicyError("timeout") from exc

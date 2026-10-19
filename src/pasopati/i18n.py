@@ -15,7 +15,52 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_help": "List commands and options",
         "quick_doctor": "Check local environment readiness",
         "quick_json": "Get machine-readable environment checks",
-        "foundation": "M1B: offline policy and diagnostics. Scanning is planned.",
+        "foundation": (
+            "M2A: authorized URL inventory; offline policy and diagnostics remain available."
+        ),
+        "recon_title": "DNS/HTTP inventory",
+        "recon_status": "Run status",
+        "recon_requests": "Request attempts used",
+        "recon_limitations": (
+            "Explicit URLs only. No crawling or subdomain discovery. Paths/queries withheld."
+        ),
+        "recon_no_findings_claim": (
+            "Vulnerability assessment NOT performed. No findings does NOT mean secure."
+        ),
+        "scan_completed": "Completed",
+        "scan_partial": "Partial",
+        "scan_failed": "Failed",
+        "scan_denied": "Denied",
+        "scan_error": "Error",
+        "scan_skipped": "Skipped",
+        "observed": "HTTP response observed; this is not a vulnerability verdict.",
+        "body_sampled": "Body sample reached its size limit; content coverage is partial.",
+        "invalid_targets": (
+            "Provide 1 to 256 explicit HTTP/HTTPS URLs within the input size limits."
+        ),
+        "targets_io": "Cannot read the target list as bounded UTF-8 input.",
+        "not_authorized": (
+            "Network access requires explicit target authorization in the configuration."
+        ),
+        "passive_profile": "The passive profile does not permit network access.",
+        "report_io": (
+            "Cannot create report output, or output already exists. "
+            "Existing data is not overwritten."
+        ),
+        "interrupted": "Interrupted. A complete report was not produced.",
+        "timeout": "The operation exceeded its deadline; coverage is incomplete.",
+        "dns_failed": "DNS resolution failed; connectivity is not established.",
+        "network_failed": "Connection, TLS verification or HTTP exchange failed.",
+        "redirect_loop": "A redirect loop was detected.",
+        "redirect_limit": "The redirect limit was reached.",
+        "https_downgrade": "HTTPS to HTTP downgrade was refused.",
+        "invalid_response": "The HTTP response is malformed or ambiguous.",
+        "encoding_denied": "Encoded response bodies are not decompressed.",
+        "body_too_large": "The response exceeded the body limit.",
+        "method_denied": "The HTTP method is not permitted by the profile.",
+        "budget_exhausted": (
+            "The shared request budget is exhausted; remaining work is not completed."
+        ),
         "config_created": "Passive configuration created; network authorization is disabled.",
         "config_valid": "Configuration is valid. This does not authorize network access.",
         "invalid_config": "Invalid configuration; check the schema and field types.",
@@ -88,7 +133,45 @@ MESSAGES: dict[Language, dict[str, str]] = {
         "quick_help": "Tampilkan perintah dan opsi",
         "quick_doctor": "Periksa kesiapan lingkungan lokal",
         "quick_json": "Dapatkan pemeriksaan lingkungan dalam JSON",
-        "foundation": "M1B: kebijakan offline dan diagnostik. Pemindaian masih direncanakan.",
+        "foundation": (
+            "M2A: inventaris URL berizin; kebijakan offline dan diagnostik tetap tersedia."
+        ),
+        "recon_title": "Inventaris DNS/HTTP",
+        "recon_status": "Status proses",
+        "recon_requests": "Percobaan request terpakai",
+        "recon_limitations": (
+            "Hanya URL eksplisit. Tanpa crawling/discovery subdomain. Path/query disamarkan."
+        ),
+        "recon_no_findings_claim": (
+            "Penilaian kerentanan TIDAK dilakukan. Tanpa temuan BUKAN berarti aman."
+        ),
+        "scan_completed": "Selesai",
+        "scan_partial": "Parsial",
+        "scan_failed": "Gagal",
+        "scan_denied": "Ditolak",
+        "scan_error": "Kesalahan",
+        "scan_skipped": "Dilewati",
+        "observed": "Respons HTTP diamati; bukan penetapan kerentanan.",
+        "body_sampled": "Sampel body mencapai batas ukuran; cakupan konten parsial.",
+        "invalid_targets": (
+            "Berikan 1 hingga 256 URL HTTP/HTTPS eksplisit dalam batas ukuran input."
+        ),
+        "targets_io": "Daftar target tidak dapat dibaca sebagai UTF-8 dalam batas ukuran.",
+        "not_authorized": "Akses jaringan memerlukan otorisasi target eksplisit dalam konfigurasi.",
+        "passive_profile": "Profil passive tidak mengizinkan akses jaringan.",
+        "report_io": "Output laporan tidak dapat dibuat atau sudah ada. Data lama tidak ditimpa.",
+        "interrupted": "Dihentikan. Laporan lengkap tidak dihasilkan.",
+        "timeout": "Operasi melewati deadline; cakupan belum lengkap.",
+        "dns_failed": "Resolusi DNS gagal; konektivitas belum terbukti.",
+        "network_failed": "Koneksi, verifikasi TLS, atau pertukaran HTTP gagal.",
+        "redirect_loop": "Loop redirect terdeteksi.",
+        "redirect_limit": "Batas redirect tercapai.",
+        "https_downgrade": "Penurunan HTTPS ke HTTP ditolak.",
+        "invalid_response": "Respons HTTP rusak atau ambigu.",
+        "encoding_denied": "Body respons terenkode tidak didekompresi.",
+        "body_too_large": "Respons melebihi batas ukuran body.",
+        "method_denied": "Metode HTTP tidak diizinkan oleh profil.",
+        "budget_exhausted": "Anggaran request bersama habis; pekerjaan tersisa belum selesai.",
         "config_created": "Konfigurasi pasif dibuat; otorisasi jaringan dinonaktifkan.",
         "config_valid": "Konfigurasi valid. Ini tidak memberikan otorisasi akses jaringan.",
         "invalid_config": "Konfigurasi tidak valid; periksa schema dan tipe field.",

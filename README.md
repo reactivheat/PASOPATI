@@ -2,10 +2,10 @@
 
 [Bahasa Indonesia](README.id.md)
 
-Reconnaissance & Exposure Analysis Framework. **M1B foundation, version 0.1.0 (unreleased).**
-Strict configuration, offline scope decisions, profiles and an internal bounded transport.
-See [configuration and scope](docs/en/configuration.md). The CLI does not scan targets or
-detect vulnerabilities. The design favors isolated installation, small modules,
+Reconnaissance & Exposure Analysis Framework. **M2A URL inventory, version 0.1.0 (unreleased).**
+Authorized, explicit-seed DNS/HTTP collection with provenance and JSON/TXT reports.
+See [recon and the local lab](docs/en/recon.md) and [scope](docs/en/configuration.md).
+This is not a vulnerability scanner. The design favors isolated installation, small modules,
 predictable output, minimal dependencies, and evidence over unsupported findings.
 
 ## Available now
@@ -17,6 +17,9 @@ predictable output, minimal dependencies, and evidence over unsupported findings
 - Strict TOML configuration, non-overwriting `init`, and offline scope checks.
 - Immutable passive/safe policies and an internal HTTP/HTTPS API with IP pinning,
   DNS/redirect validation, TLS verification, shared budgets and bounded responses.
+- `scan` for explicit URL batches, DNS/HTTP evidence and honest partial/error outcomes.
+- Normalized JSON/TXT output, conservative redaction and opt-in title samples.
+- Reproducible local-only lab: `python -m pasopati.lab`; no external target required.
 - pytest, Ruff, mypy, and a Linux/Windows CI workflow for Python 3.12–3.14.
 
 ## Installation
@@ -54,6 +57,7 @@ pasopati config validate --config pasopati.toml --json
 pasopati scope check https://example.invalid --config pasopati.toml --json
 pasopati profiles list --json
 pasopati profiles show safe --json
+pasopati scan --help
 ```
 
 Global options go before the command. Doctor additionally accepts `--config-dir PATH`.
@@ -63,6 +67,9 @@ JSON has stable English identifiers and localized details; it contains no banner
 Policy commands use 0 for success/match, 1 for denial or I/O/operational failure,
 2 for invalid arguments/configuration/profile. Scope check never tests DNS/connectivity.
 Read the [quick start](docs/en/quick-start.md) and [full command reference](docs/en/commands.md).
+For actual collection, follow the [local lab and scan guide](docs/en/recon.md).
+`init` remains passive/unauthorized. Scanning requires explicit target authorization,
+safe profile and allowlisting; exit 1 includes partial/denied/skipped coverage.
 
 ## Architecture
 
@@ -80,12 +87,17 @@ src/pasopati/
   profiles.py       immutable built-in budgets
   policy_cli.py     offline configuration/scope/profile CLI
   transport.py      pinned HTTP/HTTPS, DNS lifetime, resource limits
+  scan_cli.py       explicit active scan command and preflight
+  recon.py          normalized inventory, evidence and outcomes
+  redaction.py      conservative URL/header/title reporting boundary
+  reports.py        shared-model JSON/TXT rendering and exclusive output
+  lab.py            explicit local-only reproducible HTTP fixture
   core/errors.py    installation error and exit codes
 ```
 
 See [configuration](docs/en/configuration.md), [transport](docs/en/transport.md),
-and [AGENTS.md](AGENTS.md). The normalized TXT/JSON/HTML scan-report contract is
-documented for later milestones; no report exporters exist yet.
+and [AGENTS.md](AGENTS.md). M2A implements one normalized JSON/TXT inventory model.
+HTML export, vulnerability analysis and historical comparison remain future work.
 
 ## Development and tests
 
@@ -110,12 +122,12 @@ under [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 
 ## Planned features
 
-M2: scoped discovery modules using the M1B transport and evidence contracts.
-Later: passive discovery; DNS/subdomains; HTTP, TLS and security headers; service,
+After M2A: broader scoped discovery using the shared transport/evidence contracts.
+Later: passive discovery; subdomains; TLS certificate inventory; service,
 web/API inventory; exposure/misconfiguration detection; CVE intelligence;
 evidence-backed findings; differential analysis; asset relationships; plugins;
-reproducible local security labs; TXT/JSON/HTML reports.
-`scan`, `report`, `diff`, and `demo` remain planned, unregistered commands.
+additional reproducible labs; HTML reports.
+Standalone `report`, `diff`, and `demo` remain planned, unregistered commands.
 
 ## Screenshots and demos
 
@@ -134,8 +146,11 @@ No screenshots or videos are supplied yet. Capture genuine output following
 - Doctor briefly writes/removes a temporary probe in the config directory or nearest
   existing ancestor. It creates no persistent configuration. This does not guarantee
   future writes after permissions or storage change.
-- No scanning pipeline, persistent storage or report exporters yet. The transport
-  is an internal Python API; CLI policy commands stay offline.
+- Inventory covers explicit URLs only: no crawling, subdomain discovery, CVE checks
+  or vulnerability verdicts. JSON/TXT persistence requires explicit `--output`.
+- Non-root paths/queries are withheld; titles are off by default and heuristic
+  redaction cannot guarantee that opt-in titles contain no unknown sensitive data.
+- The initial scheduler is sequential and probes only the first validated IP.
 - IPv6 policy is unit tested; actual IPv6 transport is not claimed. DNS uses numeric
   OS-configured servers, not hosts files/mDNS/DoH; no fallback public resolver.
 - The owner has not selected a license. No license grant is supplied.
@@ -148,4 +163,5 @@ or publication. Do not include credentials, local diagnostics, or sensitive scan
 Network operations require explicit target authorization and allowlisting,
 DNS/redirect scope validation, bounded rates/concurrency/timeouts/request budgets,
 and evidence provenance. No automatic exploitation or sensitive-body persistence.
-The CLI performs no network reconnaissance. Licensing must be resolved before distribution.
+Only `scan` performs target traffic; policy commands remain offline. No external
+targets were scanned for development validation. Licensing must be resolved before distribution.

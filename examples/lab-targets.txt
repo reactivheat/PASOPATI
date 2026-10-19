@@ -1,0 +1,4 @@
+# Synthetic loopback fixtures. The redirect adds one request; 404 is an observation.
+http://127.0.0.1:8765/
+http://127.0.0.1:8765/redirect
+http://127.0.0.1:8765/missing
