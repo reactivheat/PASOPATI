@@ -131,6 +131,7 @@ def test_installed_entry_points_outside_checkout(outside_checkout: Path, module:
     for arguments in (
         ["--help"],
         ["--version"],
+        ["scan", "--help"],
         ["doctor", "--json", "--config-dir", str(tmp_path / "config")],
         ["init", "--path", str(tmp_path / "policy.toml"), "--json"],
         ["config", "validate", "--config", str(tmp_path / "policy.toml"), "--json"],

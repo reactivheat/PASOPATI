@@ -7,8 +7,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+import pasopati
+import pasopati.policy_cli as policy_cli
 import pasopati.recon as recon
 from pasopati.cli import app
+from pasopati.core.errors import InstallationError
 from pasopati.lab import LabHandler
 
 runner = CliRunner()
@@ -204,3 +207,27 @@ def test_sensitive_title_real_lab(
     titles = [o["value"] for o in payload["assets"][0]["observations"] if o["kind"] == "http.title"]
     assert titles == (["[redacted]"] if include_titles else [])
     assert "LAB_SECRET_DO_NOT_PERSIST" not in result.stdout and "Set-Cookie" not in result.stdout
+
+
+@pytest.mark.parametrize("json_output", [False, True])
+def test_missing_metadata_fails_cleanly_before_network(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, json_output: bool
+) -> None:
+    config = lab_config(tmp_path / "lab.toml", 8765)
+
+    def missing() -> str:
+        raise InstallationError("missing")
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError("No transport with missing metadata")
+
+    monkeypatch.setattr(pasopati, "get_version", missing)
+    monkeypatch.setattr(policy_cli, "get_version", missing)
+    monkeypatch.setattr(recon, "Session", forbidden)
+    args = ["scan", "http://127.0.0.1:8765/", "--config", str(config)]
+    result = runner.invoke(app, args + (["--json"] if json_output else []))
+    assert result.exit_code == 1, result.output
+    if json_output:
+        assert json.loads(result.stdout)["reason"] == "installation_error"
+    else:
+        assert "metadata" in result.output and "Traceback" not in result.output

@@ -37,8 +37,10 @@ pengguna. Kegagalan wajib menghasilkan kode 1 dan rekomendasi. Untuk otomasi,
 parse JSON dan periksa `ok` serta `checks`; jalur lokal dapat sensitif, tinjau
 sebelum dibagikan. Lihat [referensi](commands.md) untuk kontrak keluaran dan kode keluar.
 
-Belum ada perintah pemindaian. Pemindaian mendatang memerlukan
-izin eksplisit dan pembatasan scope sebelum aktivitas jaringan.
-M1B menambahkan argumen target untuk scope offline, tanpa resolve DNS atau koneksi.
-Template pasif tanpa otorisasi; kecocokan scope bukan izin menghubungi target.
-Lihat [konfigurasi](configuration.md) dan [transport internal](transport.md).
+Template pasif tanpa otorisasi. `scope check` tanpa DNS/koneksi; kecocokan bukan
+izin menghubungi target. M2A `scan` memerlukan otorisasi target, profil safe dan
+allowlist. Untuk run pertama yang nyata/reproducible, ikuti [panduan lab lokal](recon.md):
+jalankan `python -m pasopati.lab` di terminal lain, lalu pakai contoh loopback-only
+dari checkout. Laporan JSON/TXT adalah inventaris, bukan vonis kerentanan.
+Path non-root/query disamarkan; judul memerlukan opt-in. Lihat
+[konfigurasi](configuration.md) dan [transport](transport.md).

@@ -53,7 +53,8 @@ reserved, dokumentasi, shared address space dan transisi IPv6 tetap ditolak.
 `passive` tanpa metode/jaringan dan budget 0. `safe` hanya GET/HEAD, 50 request/sesi,
 1 request/detik bersama semua pemanggil, concurrency 2, 3 redirect, connect 3s,
 read 5s, total operasi 10s, body 64 KiB. Profil immutable tidak memberikan
-otorisasi atau memperluas scope. Belum ada scanner.
+otorisasi atau memperluas scope. M2A [scan](recon.md) memerlukan otorisasi,
+profil safe dan scope yang cocok; perintah kebijakan tetap offline.
 
 Kode keluar: 0 berhasil/cocok; 1 penolakan scope atau kegagalan I/O/operasi;
 2 argumen/konfigurasi/profil invalid. Kesalahan aplikasi JSON memiliki reason

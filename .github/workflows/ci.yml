@@ -38,7 +38,10 @@ jobs:
           import pathlib
           import subprocess
           import tempfile
+          import threading
           import venv
+          from http.server import ThreadingHTTPServer
+          from pasopati.lab import LabHandler
           venv.EnvBuilder(with_pip=True).create('.venv-wheel')
           scripts = pathlib.Path('.venv-wheel').resolve() / ('Scripts' if os.name == 'nt' else 'bin')
           python = scripts / ('python.exe' if os.name == 'nt' else 'python')
@@ -51,6 +54,7 @@ jobs:
               for index, command in enumerate(([str(cli)], [str(python), '-m', 'pasopati'])):
                   policy = str(pathlib.Path(outside) / f'policy-{index}.toml')
                   for args in (['--version'], ['--help'], ['doctor', '--json', '--config-dir', outside],
+                               ['scan', '--help'],
                                ['init', '--path', policy, '--json'],
                                ['config', 'validate', '--config', policy, '--json'],
                                ['scope', 'check', 'example.invalid', '--config', policy, '--json'],
@@ -61,6 +65,37 @@ jobs:
                       if '--json' in args:
                           assert json.loads(result.stdout)['ok'] is True
                           assert '\x1b' not in result.stdout
+              subprocess.run([str(python), '-c',
+                              'import pathlib, sys, pasopati.recon; '
+                              'assert pathlib.Path(pasopati.recon.__file__).is_relative_to(sys.prefix)'],
+                             cwd=outside, env=env, check=True)
+              with ThreadingHTTPServer(('127.0.0.1', 0), LabHandler) as server:
+                  worker = threading.Thread(target=server.serve_forever,
+                                            kwargs={'poll_interval': 0.01}, daemon=True)
+                  worker.start()
+                  try:
+                      lab_config = pathlib.Path(outside) / 'lab.toml'
+                      lab_config.write_text('schema_version = 1\nprofile = "safe"\nauthorized = true\n'
+                                            '[scope]\nallow_cidrs = ["127.0.0.1/32"]\n'
+                                            f'ports = [{server.server_port}]\nallow_private = true\n',
+                                            encoding='utf-8')
+                      for index, command in enumerate(([str(cli)], [str(python), '-m', 'pasopati'])):
+                          output = pathlib.Path(outside) / f'recon-{index}'
+                          result = subprocess.run(command + ['scan',
+                              f'http://127.0.0.1:{server.server_port}/', '--config', str(lab_config),
+                              '--output', str(output), '--include-titles', '--json'],
+                              cwd=outside, env=env, check=True, capture_output=True,
+                              text=True, encoding='utf-8', timeout=30)
+                          payload = json.loads(result.stdout)
+                          assert payload['ok'] is True and payload['requests_used'] == 1
+                          assert payload['assets'][0]['evidence'][-1]['http_status'] == 200
+                          assert json.loads((output / 'report.json').read_text(encoding='utf-8')) == payload
+                          assert (output / 'report.txt').is_file()
+                          assert '\x1b' not in result.stdout and 'DO_NOT_PERSIST' not in result.stdout
+                  finally:
+                      server.shutdown()
+                      worker.join(timeout=3)
+                      assert not worker.is_alive()
       - name: Smoke installed CLI
         run: |
           pasopati --version

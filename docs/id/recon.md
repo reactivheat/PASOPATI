@@ -121,9 +121,10 @@ Kedua renderer membaca satu `RunReport`, tidak menghitung temuan secara terpisah
 Setiap path URL non-root dan seluruh query disamarkan, termasuk nama parameter.
 Path berbeda dapat tampil sama; ID aset/bukti membedakannya dalam satu run.
 Pakai daftar target privat asli untuk reproduksi. Body mentah dan cookie tidak
-disimpan. Header terpilih hanya menyimpan keberadaan, media type ternormalisasi,
+disimpan. Header terpilih hanya menyimpan keberadaan, media type dikenal,
 beberapa token tetap atau kandidat produk dikenal; tanpa dump header arbitrer,
-versi, nonce CSP atau nilai cookie. Kandidat Server/X-Powered-By bersifat tentatif
+versi, nonce CSP atau nilai cookie. Media type tidak dikenal hanya mencatat keberadaan
+agar nilai arbitrer tidak diekspor. Kandidat Server/X-Powered-By bersifat tentatif
 dan dapat dipalsukan. Header yang tidak ada hanya observasi, tanpa severity atau
 klaim kerentanan terkonfirmasi.
 

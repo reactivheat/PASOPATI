@@ -54,7 +54,10 @@ def normalize_targets(values: Iterable[str]) -> tuple[str, ...]:
     result: dict[str, None] = {}
     total = 0
     for count, value in enumerate(values, 1):
-        total += len(value.encode("utf-8"))
+        try:
+            total += len(value.encode("utf-8"))
+        except UnicodeError as exc:
+            raise PolicyError("invalid_target", 2) from exc
         if count > MAX_TARGETS or total > MAX_INPUT_BYTES or len(value) > MAX_URL_LENGTH:
             raise PolicyError("invalid_targets", 2)
         result[parse_target(value, require_url=True).url] = None
@@ -102,6 +105,7 @@ class Evidence:
     method: str
     tool: str
     tool_version: str
+    confidence: str = "observed"
     addresses: tuple[str, ...] = ()
     connected_address: str | None = None
     http_status: int | None = None
@@ -131,7 +135,7 @@ class RunReport:
 
     @property
     def ok(self) -> bool:
-        return all(a.status == "completed" for a in self.assets)
+        return bool(self.assets) and all(a.status == "completed" for a in self.assets)
 
     @property
     def status(self) -> str:

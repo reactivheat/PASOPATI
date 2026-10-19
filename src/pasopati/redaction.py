@@ -25,12 +25,27 @@ def media_type(value: str | None) -> str | None:
     if value is None:
         return None
     candidate = value.split(";", 1)[0].strip().lower()
-    return (
-        candidate
-        if len(candidate) <= 128
-        and re.fullmatch(r"[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+", candidate)
-        else None
-    )
+    known = {
+        "text/html",
+        "application/xhtml+xml",
+        "application/json",
+        "application/xml",
+        "text/xml",
+        "text/plain",
+        "text/css",
+        "text/javascript",
+        "application/javascript",
+        "application/octet-stream",
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/svg+xml",
+        "image/webp",
+        "image/x-icon",
+        "image/avif",
+    }
+    return candidate if candidate in known else None
 
 
 def header_summary(name: str, value: str) -> str:

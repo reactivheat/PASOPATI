@@ -1,12 +1,13 @@
-# Transport internal dengan pembatasan scope (M1B)
+# Transport berbatas scope (M1B, diperluas untuk M2A)
 
 [English](../en/transport.md) · [Konfigurasi](configuration.md)
 
 `pasopati.transport.Session(config).fetch(url, method="GET")` adalah API Python
-untuk modul mendatang, bukan perintah scan. Hasil immutable berisi status/body/
-content-type di memori. Tidak menyimpan body, cookie atau header ke disk. Pemanggil
-mendatang tidak boleh mencetak body/URL sensitif. CLI kebijakan tetap offline dan
-tidak mengimpor transport ini.
+untuk [kolektor scan M2A](recon.md) dan modul berikutnya. Hasil immutable berisi
+status/body/content-type, trace hop respons dan flag pemotongan di memori.
+Tidak menulis body, cookie atau header ke disk. Jangan menampilkan/menyimpan body,
+URL atau nilai header sementara secara mentah. CLI kebijakan tetap offline tanpa
+impor transport; `scan` mengimpornya hanya ketika dipanggil secara eksplisit.
 
 Pemanggil wajib memberikan `Config` tervalidasi dengan otorisasi jaringan eksplisit,
 profil `safe`, serta scope yang cocok. Pengakuan pengguna bukan bukti kepemilikan/
@@ -47,8 +48,11 @@ termasuk header/chunk yang menetes. Penjadwalan OS/I/O trust store bukan jaminan
 hard real-time. Session dapat dipakai lagi setelah gagal; resource respons/socket/
 semaphore/lock selalu ditutup/dilepas.
 
-Body dibaca bertahap dan ditolak di atas 64 KiB tanpa bergantung pada Content-Length,
-termasuk framing chunked. HEAD tanpa pembacaan body. Hanya encoding identity;
+Default body dibaca bertahap dan ditolak di atas 64 KiB tanpa bergantung pada
+Content-Length, termasuk chunked. M2A secara eksplisit memakai `sample_body=True`:
+membaca maksimal 64 KiB + satu byte deteksi, membuang byte tambahan, menutup
+respons dan menandai `body_truncated`; cakupan inventaris parsial. HEAD tanpa body.
+Hanya encoding identity;
 kompresi ditolak, bukan didekompresi. Tanpa cookie jar, proxy environment,
 negosiasi autentikasi, penerusan kredensial, penyimpanan atau logging.
 
@@ -64,4 +68,8 @@ ditandai skip secara eksplisit; unit test pengaturan TLS/pinning tetap berjalan.
 Tes DNS memakai server UDP lokal, termasuk server tidak responsif untuk membuktikan
 lifetime. Policy IPv4/IPv6 diuji; jaringan IPv6 nyata dan transport target publik
 belum diklaim. Resolver tidak memakai hosts file/mDNS atau DoH/DoT.
-Milestone ini belum menyediakan discovery aset, scanning, atau analisis kerentanan.
+Callback `observe` menerima event resolusi/literal nyata yang lolos policy sebelum
+koneksi dan event hop respons sebelum membaca/mengikuti redirect. Bukti parsial
+terjaga tanpa menganggap DNS membuktikan koneksi. Event mengandung data mentah
+sementara; kolektor M2A menyamarkannya sebelum output. M2A hanya menginventarisasi
+URL eksplisit; tanpa crawling atau analisis kerentanan.

@@ -228,3 +228,23 @@ def test_report_output_never_overwrites_and_renderers_share_data(tmp_path: Path)
     with pytest.raises(PolicyError, match="report_io"):
         write_reports(report, output)
     assert (output / "report.json").read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "name,value,expected",
+    [
+        ("content-type", "application/SECRET", "present"),
+        ("content-type", "text/html; nonce=SECRET", "text/html"),
+        ("server", "SECRET", "present"),
+        ("x-powered-by", "PHP/8.0 SECRET", "php"),
+        ("x-frame-options", "SECRET", "present"),
+        ("referrer-policy", "SECRET", "present"),
+    ],
+)
+def test_headers_do_not_export_arbitrary_values(name: str, value: str, expected: str) -> None:
+    assert header_summary(name, value) == expected
+
+
+def test_surrogate_input_is_an_explicit_usage_error() -> None:
+    with pytest.raises(PolicyError, match="invalid_target"):
+        normalize_targets(["https://example.invalid/\udcff"])

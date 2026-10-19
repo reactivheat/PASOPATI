@@ -1,12 +1,13 @@
-# Internal scope-aware transport (M1B)
+# Scope-aware transport (M1B, extended for M2A)
 
 [Bahasa Indonesia](../id/transport.md) · [Configuration](configuration.md)
 
 `pasopati.transport.Session(config).fetch(url, method="GET")` is a Python API for
-future modules, not a scan command. It returns immutable status/body/content-type
-data in memory and never stores response bodies, cookies or headers on disk.
-Do not print raw bodies or sensitive URLs in future callers. CLI policy commands
-never import this transport and remain offline.
+M2A's [scan collector](recon.md) and future modules. It returns immutable
+status/body/content-type, response-hop trace and a truncation flag in memory;
+it never writes bodies, cookies or headers to disk. Do not display/store raw
+bodies, URLs or transient header values. CLI policy commands never import the
+transport and remain offline; `scan` imports it only when explicitly invoked.
 
 The caller must supply validated `Config` with explicit network authorization,
 the `safe` profile and a matching scope. User acknowledgement does not establish
@@ -48,8 +49,11 @@ receive rechecks the deadline, including trickling headers/chunk framing. Local 
 scheduling/trust-store I/O is not a hard real-time guarantee. A session is reusable
 after failure; response/socket/semaphore/lock resources are closed/released.
 
-Bodies are read incrementally and rejected above 64 KiB, even without Content-Length
-or with chunked framing. HEAD does not read a body. Only identity encoding is accepted;
+Bodies are read incrementally and rejected above 64 KiB by default, even without
+Content-Length or with chunked framing. M2A explicitly uses `sample_body=True`:
+read no more than 64 KiB + one detection byte, discard that extra byte, close the
+response and mark `body_truncated`; inventory coverage is partial. HEAD does not
+read a body. Only identity encoding is accepted;
 compressed responses are rejected rather than decompressed. No cookie jar, proxy
 environment, authentication negotiation, credential forwarding, persistence or logging.
 
@@ -65,4 +69,8 @@ integration case explicitly skips; TLS settings and pinning still have unit test
 DNS tests use local UDP servers, including an unresponsive server to prove lifetime
 enforcement. IPv4/IPv6 policy is unit tested; actual IPv6 networking and public-target
 transport are not claimed. The resolver does not use hosts files/mDNS or DoH/DoT.
-This milestone does not implement asset discovery, scanning or vulnerability analysis.
+The `observe` callback receives actual, policy-approved resolution/literal events
+before connecting and response-hop events before reading/following redirects.
+This preserves partial evidence without claiming a connection from DNS alone.
+Events contain transient raw data; M2A's collector sanitizes before output.
+M2A inventories explicit URLs only; no crawling or vulnerability analysis.

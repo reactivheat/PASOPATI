@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pasopati-recon"
 version = "0.1.0"
-description = "Reconnaissance & Exposure Analysis Framework — CLI foundation"
+description = "Scope-controlled DNS/HTTP reconnaissance with evidence-backed inventory"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["typer>=0.16,<1", "rich>=14,<15", "dnspython>=2.8,<3"]

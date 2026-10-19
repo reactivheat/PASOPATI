@@ -11,6 +11,8 @@
   URL/header redaction and opt-in, bounded, heuristically redacted title samples.
 - Add local-only HTTP lab, synthetic configuration/targets, end-to-end tests and
   bilingual inventory documentation. No external-target scan used for validation.
+- Extend clean-wheel CI to real local recon through both installed entry points;
+  add contribution/security-reporting guidance without choosing a license.
 
 No crawling, subdomain discovery, vulnerability/CVE claims, HTML report, package
 publication, tag, release or license selected. Version remains unreleased 0.1.0.

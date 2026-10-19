@@ -118,3 +118,12 @@ Validasi Kali lokal memakai opsi ini dan meluluskan seluruh suite. Ini keterbata
 runner/mount; verifikasi VM native sebaiknya juga mencoba perintah normal di atas.
 Tidak perlu mengubah execution policy host, Python sistem, atau perlindungan
 package manager.
+
+## Verifikasi koleksi M2A secara lokal
+
+Setelah instalasi, jalankan `pasopati scan --help` dan `python -m pasopati.lab --help`
+dengan environment terpasang. Ikuti [lab loopback reproducible](recon.md) untuk
+memverifikasi koleksi nyata dan output JSON/TXT. Tidak memerlukan target eksternal;
+doctor/perintah kebijakan tetap offline. Jangan melemahkan scope atau verifikasi
+TLS untuk memaksakan hasil berhasil. CI wheel juga menguji kedua entry point
+dengan fixture lokal ini dari direktori di luar checkout sumber.

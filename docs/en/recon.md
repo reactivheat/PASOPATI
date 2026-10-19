@@ -121,7 +121,8 @@ Every non-root URL path and the entire query are withheld, including query keys.
 Different paths may therefore display alike; stable asset/evidence IDs distinguish
 them within a run. Use your original private target list for reproducibility.
 Raw bodies and cookies are never persisted. Selected headers retain presence,
-normalized media type, a few fixed tokens or a recognized product candidate;
+recognized media type, a few fixed tokens or a recognized product candidate;
+unknown media types retain presence only to avoid exporting arbitrary header data;
 no arbitrary header dumps, versions, CSP nonces or cookie values are exported.
 A Server/X-Powered-By candidate is tentative and can be forged; missing headers
 are observations only, without severity or a confirmed vulnerability claim.

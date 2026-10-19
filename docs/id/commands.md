@@ -21,6 +21,11 @@
 | `scope check TARGET --config pasopati.toml [--json]` | Kecocokan scope offline, tanpa DNS/koneksi |
 | `profiles list [--json]` | Daftar kebijakan passive/safe immutable |
 | `profiles show safe [--json]` | Tampilkan kebijakan tanpa menjalankannya |
+| `scan URL --config FILE [--json]` | Koleksi inventaris DNS/HTTP eksplisit berizin |
+| `scan --targets-file FILE --config FILE` | Validasi/deduplikasi batch URL berbatas |
+| `scan ... --output DIREKTORI_BARU` | Simpan JSON/TXT secara eksplisit, tidak menimpa |
+| `scan ... --include-titles` | Opt-in judul berbatas dengan penyamaran heuristik |
+| `python -m pasopati.lab --port 8765` | Fixture HTTP lokal eksplisit, bukan subcommand CLI |
 
 Opsi global sebelum `doctor`, misalnya `pasopati --lang id --no-banner doctor`.
 Penempatan ini mengikuti [konvensi callback Typer](https://typer.tiangolo.com/tutorial/commands/callback/).
@@ -63,10 +68,16 @@ kegagalan. Induk konfigurasi yang layak bukan jaminan semua penulisan mendatang.
 
 ## Perintah direncanakan
 
-`scan`, `report`, `diff`, `demo` belum diimplementasikan atau didaftarkan.
-Laporan mendatang memakai model normalisasi bersama untuk TXT/JSON/HTML; lihat
-[AGENTS.md](../../AGENTS.md). M1B menyediakan [konfigurasi/scope/profil](configuration.md)
-dan [transport internal](transport.md). Kode keluar kebijakan: 0 berhasil/cocok,
+Perintah mandiri `report`, `diff`, `demo` belum diimplementasikan/didaftarkan.
+M2A [scan dan laporan JSON/TXT](recon.md) memakai satu model bersama; HTML masih rencana.
+Lihat [AGENTS.md](../../AGENTS.md). M1B menyediakan [konfigurasi/scope/profil](configuration.md)
+dan [transport](transport.md). Kode keluar kebijakan: 0 berhasil/cocok,
 1 penolakan/I/O/kegagalan operasi, 2 argumen/konfigurasi/profil invalid. Kesalahan
 aplikasi JSON tetap satu dokumen dengan reason stabil; kesalahan parser Typer tetap
 teks. Input target/konfigurasi invalid tidak dicetak mentah. `init` juga menerima `--json`.
+
+Scan memerlukan izin eksplisit, profil safe dan scope yang cocok. Exit 0 berarti
+inventaris lengkap, bukan target aman. Exit 1 mencakup partial/denied/error/skipped
+dan gagal output. Exit 2 berarti input/konfigurasi invalid; kesalahan aplikasi
+mendukung JSON, kesalahan parser Typer tetap teks. Laporan mencatat cakupan/bukti
+dan `vulnerability_assessment = "not_performed"`.

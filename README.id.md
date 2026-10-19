@@ -123,6 +123,9 @@ tersedia di [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 
 ## Fitur direncanakan
 
+Lihat [roadmap kemampuan dan kriteria pembanding](docs/id/roadmap.md).
+Untuk dokumentasi Kali VirtualBox native, ikuti [panduan demo manual](docs/id/kali-vm-demo.md).
+
 Setelah M2A: discovery lebih luas melalui transport bersama dan kontrak bukti.
 Tahap berikutnya: discovery pasif; subdomain; inventaris sertifikat TLS;
 inventaris layanan, web/API; deteksi paparan/salah konfigurasi; intelijen CVE;
@@ -158,8 +161,9 @@ Belum ada screenshot atau video. Rekam keluaran nyata mengikuti
 
 ## Kontribusi, keamanan, dan scope
 
-Baca [AGENTS.md](AGENTS.md), gunakan environment terisolasi, tambahkan tes offline
-yang bermakna, jalankan pemeriksaan, dan perbarui kedua bahasa. Tinjau perubahan
+Baca [AGENTS.md](AGENTS.md), [panduan kontribusi](docs/id/contributing.md), dan
+[pelaporan keamanan](SECURITY.md). Gunakan environment terisolasi, tambahkan tes
+offline bermakna, jalankan pemeriksaan, dan perbarui kedua bahasa. Tinjau perubahan
 sebelum commit/publikasi. Jangan sertakan kredensial, diagnostik lokal, atau data
 pemindaian sensitif. Operasi jaringan wajib memiliki izin target dan
 allowlist, validasi DNS/redirect, batas laju/concurrency/timeout/anggaran request,

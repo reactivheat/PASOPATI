@@ -54,7 +54,7 @@ in tracked files. Run subprocess entry-point tests from outside the checkout.
 - Missing optional Git/pipx/Nmap/Nuclei/Subfinder does not fail M1A. Python,
   installed metadata, usable configuration path, and write capability are required.
 
-## Future architecture (documented contracts, not implemented)
+## Architecture and collection controls
 
 M1B implements scope configuration, explicit profiles, and scope-aware transport.
 M2A collection and future discovery/analysis modules depend on those shared controls,
@@ -98,6 +98,9 @@ tool adapters must use argument arrays, timeouts and validated scope, never shel
 interpolation. Test these controls offline against local fixtures before live use.
 
 ## Future report contract
+
+M2A implements the JSON/TXT inventory subset below. Findings remain empty and
+vulnerability_assessment is not_performed; HTML/analysis/import/diff are future work.
 
 One normalized, versioned data model must feed every renderer, including assets,
 observations, evidence provenance, findings, confidence, severity and run metadata.

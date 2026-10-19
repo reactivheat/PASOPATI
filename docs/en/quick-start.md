@@ -37,8 +37,11 @@ Required failures return 1 and include recommendations. For automation, parse JS
 and inspect `ok` plus `checks`; local paths may be sensitive, so review before sharing.
 See [commands](commands.md) for the output contract and exit-code semantics.
 
-There are no scanning commands. Future scanning must be explicitly authorized
-and bounded by scope before any network activity. Scope target arguments
-never resolve DNS or connect. The
-template is passive and unauthorized. A match is not permission to connect.
-See [configuration](configuration.md) and [internal transport](transport.md).
+The template is passive and unauthorized. `scope check` never resolves DNS or
+connects; a match is not permission to connect. M2A `scan` requires target
+authorization, safe profile and allowlisting. For a real, reproducible first run,
+follow the [local lab guide](recon.md): start `python -m pasopati.lab` in a separate
+terminal, then use the checked-in loopback-only examples from the checkout.
+Reports are JSON/TXT inventories, not vulnerability verdicts. Non-root paths and
+queries are withheld; titles require explicit opt-in. See [configuration](configuration.md)
+and [transport](transport.md).

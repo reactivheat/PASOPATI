@@ -119,3 +119,12 @@ The local Kali validation used this option and passed the complete suite. This i
 test-runner/mount limitation; native VM verification should also try the normal
 command above. No host execution policy, system Python, or package-manager
 protection needs to be changed.
+
+## Verify M2A collection locally
+
+After installation, run `pasopati scan --help` and `python -m pasopati.lab --help`
+using the installed environment. Follow the [reproducible loopback lab](recon.md)
+to verify actual collection and JSON/TXT output. No external target is needed;
+the doctor/policy commands remain offline. Do not weaken scope or TLS verification
+to obtain a successful result. The wheel CI also tests both entry points against
+this local fixture from outside the source checkout.

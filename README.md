@@ -122,6 +122,9 @@ under [GitHub Actions](https://github.com/reactivheat/PASOPATI/actions).
 
 ## Planned features
 
+See the [capability roadmap and comparison criteria](docs/en/roadmap.md).
+For native Kali VirtualBox documentation, use the [manual demo guide](docs/en/kali-vm-demo.md).
+
 After M2A: broader scoped discovery using the shared transport/evidence contracts.
 Later: passive discovery; subdomains; TLS certificate inventory; service,
 web/API inventory; exposure/misconfiguration detection; CVE intelligence;
@@ -158,6 +161,7 @@ No screenshots or videos are supplied yet. Capture genuine output following
 ## Contributing, security, and scope
 
 Read [AGENTS.md](AGENTS.md), use a virtual environment, add meaningful offline tests,
+follow [contribution guidance](CONTRIBUTING.md) and [security reporting](SECURITY.md),
 run the checks above, and keep documentation bilingual. Review changes before commits
 or publication. Do not include credentials, local diagnostics, or sensitive scan data.
 Network operations require explicit target authorization and allowlisting,

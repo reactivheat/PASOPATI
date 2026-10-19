@@ -1,6 +1,7 @@
 """Offline M1B CLI; no transport import or network initialization."""
 
 import json
+from contextlib import suppress
 from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated
@@ -11,7 +12,7 @@ from rich.console import Console
 from pasopati import get_version
 from pasopati.branding import render_banner
 from pasopati.config import init_config, load_config
-from pasopati.core.errors import PolicyError
+from pasopati.core.errors import InstallationError, PolicyError
 from pasopati.i18n import Language, tr
 from pasopati.profiles import PROFILES, get_profile
 from pasopati.scope import Scope
@@ -37,7 +38,8 @@ def emit(ctx: typer.Context, payload: dict[str, object], json_output: bool, code
     else:
         console = Console()
         if not ctx.obj.no_banner:
-            render_banner(console, get_version(), language)
+            with suppress(InstallationError):
+                render_banner(console, get_version(), language)
         console.print(str(payload["message"]), markup=False, highlight=False)
         if "dns_checked" in payload:
             console.print(tr(language, "offline_scope"), markup=False)

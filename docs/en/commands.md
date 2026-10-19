@@ -21,6 +21,11 @@
 | `scope check TARGET --config pasopati.toml [--json]` | Offline scope match; no DNS/connectivity |
 | `profiles list [--json]` | List immutable passive/safe policies |
 | `profiles show safe [--json]` | Show a policy; does not execute it |
+| `scan URL --config FILE [--json]` | Collect explicit, authorized DNS/HTTP inventory |
+| `scan --targets-file FILE --config FILE` | Validate/deduplicate a bounded URL batch |
+| `scan ... --output NEW_DIRECTORY` | Explicit JSON/TXT files, never overwrite |
+| `scan ... --include-titles` | Opt into bounded, heuristically redacted titles |
+| `python -m pasopati.lab --port 8765` | Explicit local-only HTTP fixture, not a CLI subcommand |
 
 Global options go before `doctor`, e.g. `pasopati --lang id --no-banner doctor`.
 This follows Typer's [command callback convention](https://typer.tiangolo.com/tutorial/commands/callback/).
@@ -62,11 +67,17 @@ Do not infer that a reachable config ancestor guarantees all future writes.
 
 ## Planned commands
 
-`scan`, `report`, `diff`, `demo` are not implemented or registered. Reports
-will eventually share a normalized model with TXT/JSON/HTML renderers; see
-[AGENTS.md](../../AGENTS.md). M1B [configuration/scope/profiles](configuration.md)
-and [internal transport](transport.md) are available. Policy commands use exit 0
+Standalone `report`, `diff`, `demo` are not implemented or registered. M2A
+[scan and JSON/TXT reports](recon.md) use one normalized model; HTML remains future work.
+See [AGENTS.md](../../AGENTS.md). M1B [configuration/scope/profiles](configuration.md)
+and [transport](transport.md) remain available. Policy commands use exit 0
 for success/match, 1 for denial/I/O/operational failure, 2 for invalid arguments,
 configuration or profile. Application JSON errors preserve one document with stable
 reason codes; Typer parser errors remain text. Invalid targets/config errors are
 never echoed verbatim. `init` also accepts `--json`.
+
+Scan requires explicit authorization, safe profile and matching scope. Exit 0
+means complete inventory, not secure targets. Exit 1 includes partial/denied/error/
+skipped coverage and output failure. Exit 2 means invalid input/configuration;
+application failures support JSON, Typer parser failures remain text. Reports
+include coverage/provenance and `vulnerability_assessment = "not_performed"`.

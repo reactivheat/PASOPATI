@@ -53,7 +53,8 @@ documentation, shared address space and IPv6 transition mechanisms remain denied
 `passive` has no methods/network and budget 0. `safe` permits GET/HEAD with 50
 requests/session, 1 request/second shared across callers, concurrency 2, 3 redirects,
 connect 3s, read 5s, total operation 10s, body 64 KiB. Profiles are immutable built-in
-policies; they cannot grant authorization or expand scope. No scanner is available.
+policies; they cannot grant authorization or expand scope. M2A [scan](recon.md)
+requires authorization, the safe profile and matching scope; policy commands stay offline.
 
 Exit codes: 0 success/match; 1 scope denial or I/O/operational failure; 2 invalid
 arguments/configuration/profile. Application JSON errors contain a stable reason
