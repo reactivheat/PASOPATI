@@ -3,7 +3,8 @@
 [English](README.md)
 
 Reconnaissance & Exposure Analysis Framework. **M1A: fondasi CLI, versi 0.1.0.**
-Milestone ini menyediakan diagnostik lingkungan lokal. Pemindaian target dan
+Perintah kebijakan M1B tersedia; transport internal sedang divalidasi.
+Lihat [konfigurasi dan scope](docs/id/configuration.md). Pemindaian target dan
 deteksi kerentanan belum tersedia. Desain mengutamakan instalasi terisolasi,
 modul kecil, keluaran konsisten, dependensi minimal, dan temuan berdasarkan bukti.
 

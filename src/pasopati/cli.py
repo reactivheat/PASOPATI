@@ -13,13 +13,18 @@ from pasopati.branding import render_banner
 from pasopati.core.errors import ExitCode, InstallationError
 from pasopati.doctor import run_doctor
 from pasopati.i18n import Language, tr
+from pasopati.policy_cli import config_app, initialize, profiles_app, scope_app
 
 app = typer.Typer(
-    help="PASOPATI - Reconnaissance & Exposure Analysis Framework. M1A: local diagnostics.",
+    help="PASOPATI - Reconnaissance & Exposure Analysis Framework. Offline policy and diagnostics.",
     add_completion=False,
     no_args_is_help=False,
     pretty_exceptions_enable=False,
 )
+app.command("init")(initialize)
+app.add_typer(config_app, name="config")
+app.add_typer(scope_app, name="scope")
+app.add_typer(profiles_app, name="profiles")
 
 
 @dataclass(frozen=True)

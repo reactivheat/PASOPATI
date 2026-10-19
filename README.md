@@ -3,7 +3,8 @@
 [Bahasa Indonesia](README.id.md)
 
 Reconnaissance & Exposure Analysis Framework. **M1A: CLI foundation, version 0.1.0.**
-This milestone provides local environment diagnostics. It does not scan targets or
+M1B policy commands are now available; internal transport validation is in progress.
+See [configuration and scope](docs/en/configuration.md). The CLI does not scan targets or
 detect vulnerabilities. The design favors isolated installation, small modules,
 predictable output, minimal dependencies, and evidence over unsupported findings.
 

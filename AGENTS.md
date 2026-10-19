@@ -3,9 +3,11 @@
 ## Scope and implementation status
 
 M1A implements packaging, CLI presentation, EN/ID messages, and offline local
-environment diagnostics. Only `doctor` is a registered subcommand. Do not add
+environment diagnostics. M1B adds strict TOML, scope checks and built-in profiles;
+its internal HTTP transport is being validated. Registered commands are `doctor`,
+`init`, `config validate`, `scope check`, and `profiles list/show`. Do not add
 scanners, crawling, databases, plugins, or empty engines until their milestone is
-explicitly requested. Planned commands: `init`, `scan`, `report`, `diff`, `demo`.
+explicitly requested. Planned commands: `scan`, `report`, `diff`, `demo`.
 
 Use Python 3.12+, a `src/` layout, Typer and Rich, standard-library facilities,
 type annotations, explicit errors, and small testable components. Keep packaging
@@ -17,7 +19,9 @@ when metadata is missing. Do not hardcode developer paths or require admin right
 Inspect current files and preserve user changes. Use isolated environments and
 avoid global package or Git configuration changes. Do not commit or push unless
 the owner requests it. No license has been selected; do not choose one for the owner.
-The proposed remote and distribution name are unverified/unreserved.
+The owner authorized checkpoint commits/pushes to https://github.com/reactivheat/PASOPATI.
+Do not publish packages, tags or releases under that authorization. The distribution
+name remains unreserved.
 
 From a development environment installed with `python -m pip install -e ".[dev]"`:
 
